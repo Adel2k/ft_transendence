@@ -21,6 +21,8 @@
     "fastify-formbody": "^5.2.0",
     "fastify-plugin": "^5.0.1",
     "knex": "^3.1.0",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
