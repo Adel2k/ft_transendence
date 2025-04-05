@@ -44,7 +44,75 @@ const updateAvatar = async (req, reply) => {
     }
 };
 
+const addFriend = async (req, reply) => {
+    const userId = req.user.id;
+    const friendId = parseInt(req.params.friendId);
+
+    if (userId === friendId)
+        return reply.status(400).send({error: "You can't friend yourself."});
+
+    try {
+        const existing = await prisma.friendship.findFirst({
+            where: {
+                OR: [
+                    {userId, friendId},
+                    {userId: friendId, friendId: userId},
+                ],
+            },
+        });
+
+        if (existing)
+            return reply.status(400).send({error: "You're already friends."});
+
+        await prisma.friendship.create({
+            data: {userId, friendId},
+        });
+
+        reply.send({message: "Friend added."});
+    } catch (err) {
+        console.error(err);
+        reply.status(500).send({error: 'Failed to add friend.'});
+    }
+};
+
+const listFriends = async (req, reply) => {
+    const userId = req.user.id;
+
+    try {
+        const friendships = await prisma.friendship.findMany({
+            where: {
+                OR: [
+                    {userId},
+                    {friendId: userId},
+                ],
+            },
+            include: {
+                user: true,
+                friend: true,
+            },
+        });
+
+        const friends = friendships.map((f) => {
+            const friend =
+                f.userId === userId ? f.friend : f.user;
+            return {
+                id: friend.id,
+                username: friend.username,
+                avatarUrl: friend.avatarUrl,
+                isOnline: false,
+            };
+        });
+
+        reply.send({friends});
+    } catch (err) {
+        console.error(err);
+        reply.status(500).send({error: 'Failed to get friends list.'});
+    }
+};
+
 export default {
     me,
     updateAvatar,
+    addFriend,
+    listFriends
 };

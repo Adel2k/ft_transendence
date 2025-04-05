@@ -23,4 +23,18 @@ model User {
   twofaSecret   String?  // nullable
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  friends       Friendship[]  @relation("UserFriend")
+  friendOf      Friendship[]  @relation("FriendOf")
+}
+
+model Friendship {
+  id        Int    @id @default(autoincrement())
+  userId    Int
+  friendId  Int
+
+  user      User   @relation("UserFriend", fields: [userId], references: [id])
+  friend    User   @relation("FriendOf", fields: [friendId], references: [id])
+
+  @@unique([userId, friendId])
 }
