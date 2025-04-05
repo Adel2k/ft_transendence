@@ -2,10 +2,11 @@ import bcrypt from 'bcrypt';
 import prisma from '../db/prisma.js';
 import { app } from '../server.js';
 
-const SALT_ROUNDS = 10;
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
+const AVATAR_BASE = process.env.DEFAULT_AVATAR;
 
 const register = async (req, reply) => {
-	const { email, username, password } = req.body;
+	const { email, username, password, avatarUrl } = req.body;
 
 	if (!email || !username || !password)
 		return reply.status(400).send({ error: 'All fields are required.' });
@@ -18,6 +19,7 @@ const register = async (req, reply) => {
 				email,
 				username,
 				password: hashedPassword,
+				avatarUrl: avatarUrl || `${AVATAR_BASE}${encodeURIComponent(username)}`,
 			},
 		});
 
@@ -30,6 +32,7 @@ const register = async (req, reply) => {
 		}
 	}
 };
+
 
 const login = async (req, reply) => {
 	const { email, password } = req.body;

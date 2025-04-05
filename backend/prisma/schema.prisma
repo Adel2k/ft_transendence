@@ -18,6 +18,7 @@ model User {
   email         String   @unique
   username      String   @unique
   password      String
+  avatarUrl     String?
   is2faEnabled  Boolean  @default(false)
   twofaSecret   String?  // nullable
   createdAt     DateTime @default(now())
