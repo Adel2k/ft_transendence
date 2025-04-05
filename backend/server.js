@@ -1,17 +1,25 @@
 import Fastify from 'fastify';
-import formbody from '@fastify/formbody';
+import fs from 'fs';
+import path from 'path';
 import 'dotenv/config';
 
 import jwtPlugin from './plugins/jwt.js';
 import registerRoutes from './routes/index.js';
+import formbody from '@fastify/formbody';
 
-const fastify = Fastify({logger: true});
+const fastify = Fastify({
+    logger: true,
+    https: {
+        key: fs.readFileSync(path.resolve(process.env.HTTPS_KEY)),
+        cert: fs.readFileSync(path.resolve(process.env.HTTPS_CERT)),
+    },
+});
 
 fastify.register(formbody);
 fastify.register(jwtPlugin);
 fastify.register(registerRoutes);
 
-fastify.listen({port: 3000}, (err) => {
+fastify.listen({ port: process.env.PORT || 3000 }, (err) => {
     if (err) throw err;
 });
 
