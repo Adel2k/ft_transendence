@@ -21,6 +21,10 @@ async function userRoutes(fastify, options) {
         handler: userController.listFriends,
     });
 
+    fastify.get('/history', {
+        preValidation: [fastify.authenticate],
+        handler: userController.getMatchHistory,
+    });
 }
 
 export default userRoutes;

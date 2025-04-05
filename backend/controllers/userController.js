@@ -8,6 +8,9 @@ const me = async (req, reply) => {
             email: true,
             username: true,
             avatarUrl: true,
+            wins: true,
+            losses: true,
+            totalMatches: true,
         },
     });
 
@@ -110,9 +113,50 @@ const listFriends = async (req, reply) => {
     }
 };
 
+const getMatchHistory = async (req, reply) => {
+    const userId = req.user.id;
+
+    try {
+        const matches = await prisma.match.findMany({
+            where: {
+                OR: [
+                    { player1Id: userId },
+                    { player2Id: userId },
+                ],
+            },
+            include: {
+                player1: true,
+                player2: true,
+                winner: true,
+            },
+            orderBy: { playedAt: 'desc' },
+        });
+
+        const history = matches.map((match) => {
+            const isWinner = match.winnerId === userId;
+
+            return {
+                id: match.id,
+                opponent:
+                    match.player1Id === userId
+                        ? match.player2.username
+                        : match.player1.username,
+                result: isWinner ? 'win' : 'loss',
+                playedAt: match.playedAt,
+            };
+        });
+
+        reply.send({ history });
+    } catch (err) {
+        console.error(err);
+        reply.status(500).send({ error: 'Failed to load match history.' });
+    }
+};
+
 export default {
     me,
     updateAvatar,
     addFriend,
-    listFriends
+    listFriends,
+    getMatchHistory
 };

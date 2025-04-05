@@ -24,8 +24,16 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  wins           Int           @default(0)
+  losses         Int           @default(0)
+  totalMatches   Int           @default(0)
+
   friends       Friendship[]  @relation("UserFriend")
   friendOf      Friendship[]  @relation("FriendOf")
+
+  matchesAsPlayer1 Match[] @relation("Player1")
+  matchesAsPlayer2 Match[] @relation("Player2")
+  matchesWon       Match[] @relation("MatchWinner")
 }
 
 model Friendship {
@@ -38,3 +46,18 @@ model Friendship {
 
   @@unique([userId, friendId])
 }
+
+model Match {
+  id         Int      @id @default(autoincrement())
+  player1    User     @relation("Player1", fields: [player1Id], references: [id])
+  player1Id  Int
+
+  player2    User     @relation("Player2", fields: [player2Id], references: [id])
+  player2Id  Int
+
+  winner     User     @relation("MatchWinner", fields: [winnerId], references: [id])
+  winnerId   Int
+
+  playedAt   DateTime @default(now())
+}
+
