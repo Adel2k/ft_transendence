@@ -1,0 +1,12 @@
+{
+    "name": "frontend",
+    "scripts": {
+      "build": "tailwindcss -i ./public/styles.css -o ./public/tailwind.css --minify"
+    },
+    "devDependencies": {
+      "tailwindcss": "^3.4.1",
+      "postcss": "^8.4.31",
+      "autoprefixer": "^10.4.16"
+    }
+  }
+  
