@@ -1,30 +1,68 @@
-LIGTH_PURPLE   = \033[1;35m
-RESET           = \033[0m
+BLACK			= \e[30m
+RED				= \e[31m
+GREEN			= \e[32m
+YELLOW			= \e[33m
+BLUE			= \e[34m
+MAGENTA			= \e[35m
+CYAN			= \e[36m
+WHITE			= \e[37m
+RESET			= \e[0m
 
-all: up
+BOLD			= \e[1m
+DIM				= \e[2m
+UNDERLINE		= \e[4m
+BLINK			= \e[5m
+REVERSE			= \e[7m
+HIDDEN			= \e[8m
 
-re: fclean all
+BG_BLACK		= \e[40m
+BG_RED			= \e[41m
+BG_GREEN		= \e[42m
+BG_YELLOW		= \e[43m
+BG_BLUE			= \e[44m
+BG_MAGENTA		= \e[45m
+BG_CYAN			= \e[46m
+BG_WHITE		= \e[47m
+
+all: build
+
+re: clean all
+
+build:
+	@echo "${GREEN}${BOLD}Building up containers...${RESET}"
+	@docker-compose up -d --build 
+	@echo "${GREEN}✅ Done...${RESET}\n"
+	@echo "$(BG_BLUE)╔════════════════════════════════════════════════════════════╗$(RESET)"
+	@echo "$(BG_BLUE)║                       ${BLACK}${BOLD}🎉WELCOME TO🎉$(RESET)$(BG_BLUE)                       ║$(RESET)"
+	@echo "$(BG_BLUE)║                       ${BLACK}${BOLD}FT_Gmbrdilos🦏$(RESET)$(BG_BLUE)                       ║$(RESET)"
+	@echo "$(BG_BLUE)╚════════════════════════════════════════════════════════════╝$(RESET)"
+
+front:
+	@echo "${GREEN}${BOLD}Starting front container..${RESET}"
+	@docker-compose -f docker-compose.yml up -d --build frontend
+
+nginx:
+	@echo "${GREEN}${BOLD}Starting nginx container..${RESET}"
+	@docker compose -f docker-compose.yml up -d --build nginx
+
+backend:
+	@echo "${GREEN}${BOLD}Starting backend container..${RESET}"
+	@docker compose -f docker-compose.yml up -d --build backend
 
 up:
-	@echo "${LIGTH_PURPLE}Starting up containers...${RESET}"
-	@docker-compose up -d --build 
-	@echo "${LIGTH_PURPLE}Done...${RESET}"
+	@echo "${YELLOW}${BOLD}Starting up containers...${RESET}"
+	@docker-compose up
+	@echo "${GREEN}✅ Done...${RESET}"
 
 down:
-	@echo "${LIGTH_PURPLE}Shutting down containers...${RESET}"
-	@docker-compose -f ./srcs/docker-compose.yml down
-	@echo "${LIGTH_PURPLE}Done...${RESET}"
+	@echo "${YELLOW}${BOLD}Shutting down containers...${RESET}"
+	@docker-compose down
+	@echo "${GREEN}✅ Done...${RESET}"
 
 clean: down
-	@echo "${LIGTH_PURPLE}Cleaning up containers, volumes, and networks...${RESET}"
-	@docker volume ls -q | grep -E 'srcs_adminer_volume|srcs_db_volume|srcs_redis_volume|srcs_wp_volume' | xargs -r docker volume rm
-	@sudo rm -rf /home/$(USER)/data/wordpress
-	@sudo rm -rf /home/$(USER)/data/mariadb
-	@echo "${LIGTH_PURPLE}Done...${RESET}"
+	@echo "${RED}${BOLD}Cleaning up containers, volumes, and networks...${RESET}"
+	@docker-compose down --rmi all
+	@docker system prune --volumes --force --all
+	@echo "${GREEN}✅ Done...${RESET}"
 
-fclean: clean
-	@echo "${LIGTH_PURPLE}Removing Docker images...${RESET}"
-	@docker images -q | xargs -r docker rmi -f
-	@echo "${LIGTH_PURPLE}Done...${RESET}"
-
-.PHONY: all re up down create_dirs fclean clean
+.PHONY: all re up down front backend nginx build clean
