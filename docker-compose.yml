@@ -1,7 +1,7 @@
 services:
 
   frontend:
-    build: ./Dockerfiles/frontend/
+    build: ./frontend/
     container_name: frontend
     restart: always
     depends_on: 
@@ -14,7 +14,7 @@ services:
       - 80
 
   backend:
-    build: ./Dockerfiles/backend/
+    build: ./backend/
     container_name: backend
     restart: always
 
@@ -27,7 +27,7 @@ services:
 
   nginx:
 
-    build: ./Dockerfiles/nginx/
+    build: ./nginx/
 
     container_name: reverse_proxy
     
@@ -41,8 +41,8 @@ services:
       - backend
 
     volumes:
-        - ./Dockerfiles/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-        - ./Dockerfiles/nginx/certs:/etc/nginx/certs
+        - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        - ./nginx/certs:/etc/nginx/certs
 
     networks:
       - app-network
