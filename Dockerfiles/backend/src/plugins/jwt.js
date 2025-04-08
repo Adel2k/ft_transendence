@@ -16,3 +16,4 @@ async function jwtPlugin(fastify, opts) {
 }
 
 export default fp(jwtPlugin);
+
