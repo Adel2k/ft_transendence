@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import prisma from '../db/prisma.js';
 import {app} from '../server.js';
 import speakeasy from 'speakeasy';
