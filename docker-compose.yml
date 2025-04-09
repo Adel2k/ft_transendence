@@ -30,7 +30,7 @@ services:
 
     build: ./nginx/
 
-    container_name: reverse_proxy
+    container_name: nginx
     
     ports:
       - 443:443

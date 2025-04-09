@@ -19,10 +19,12 @@ fastify.register(formbody);
 fastify.register(jwtPlugin);
 fastify.register(registerRoutes);
 
-fastify.listen({ port: process.env.PORT || 3000 }, (err) => {
+// 👇 FIX: bind to 0.0.0.0
+fastify.listen({
+    port: process.env.PORT || 3000,
+    host: '0.0.0.0'
+}, (err) => {
     if (err) throw err;
 });
-
-
 
 export const app = fastify;
