@@ -17,11 +17,8 @@ services:
     build: ./backend/
     container_name: backend
     restart: always
-
-    expose: 
-      - 3000
     env_file:
-      - ./backend/src/.env
+      - ./backend/.env
     networks:
         - app-network
 

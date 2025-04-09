@@ -19,7 +19,12 @@ fastify.register(formbody);
 fastify.register(jwtPlugin);
 fastify.register(registerRoutes);
 
-// 👇 FIX: bind to 0.0.0.0
+// 👇 Add this basic test route
+fastify.get('/', async (request, reply) => {
+  return { message: 'Hello from Fastify backend!' };
+});
+
+// 👇 You're already binding to 0.0.0.0 — good!
 fastify.listen({
     port: process.env.PORT || 3000,
     host: '0.0.0.0'

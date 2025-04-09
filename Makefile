@@ -36,6 +36,7 @@ build:
 	@echo "$(BG_BLUE)║                       ${BLACK}${BOLD}🎉WELCOME TO🎉$(RESET)$(BG_BLUE)                       ║$(RESET)"
 	@echo "$(BG_BLUE)║                       ${BLACK}${BOLD}FT_Gmbrdilos🦏$(RESET)$(BG_BLUE)                       ║$(RESET)"
 	@echo "$(BG_BLUE)╚════════════════════════════════════════════════════════════╝$(RESET)"
+	@docker ps
 
 front:
 	@echo "${GREEN}${BOLD}Starting front container..${RESET}"
@@ -43,11 +44,11 @@ front:
 
 nginx:
 	@echo "${GREEN}${BOLD}Starting nginx container..${RESET}"
-	@docker compose -f docker-compose.yml up -d --build nginx
+	@docker-compose -f docker-compose.yml up -d --build nginx
 
 backend:
 	@echo "${GREEN}${BOLD}Starting backend container..${RESET}"
-	@docker compose -f docker-compose.yml up -d --build backend
+	@docker-compose -f docker-compose.yml up -d --build backend
 
 up:
 	@echo "${YELLOW}${BOLD}Starting up containers...${RESET}"
