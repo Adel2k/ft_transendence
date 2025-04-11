@@ -1,9 +1,13 @@
 {
     "name": "frontend",
     "scripts": {
-      "build": "tailwindcss -i ./public/styles.css -o ./public/tailwind.css --minify"
+      "build:css": "npx tailwindcss -i ./src/styles/input.css -o ./dist/styles.css --minify",
+      "build:ts": "tsc",
+      "build": "npm run build:css && npm run build:ts",
+      "dev": "concurrently \"npx tailwindcss -i ./src/styles/input.css -o ./dist/styles.css --watch\" \"tsc --watch\""
     },
     "devDependencies": {
+      "typescript": "^4.9.5",
       "tailwindcss": "^3.4.1",
       "postcss": "^8.4.31",
       "autoprefixer": "^10.4.16"
