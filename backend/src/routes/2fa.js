@@ -1,18 +1,18 @@
 import twofaController from '../controllers/twofaController.js';
 
 export default async function twofaRoutes(fastify, opts) {
-    fastify.get('/setup', {
+    fastify.get('/on', {
         preValidation: [fastify.authenticate],
-        handler: twofaController.generate2FA,
+        handler: twofaController.generate2FASetup,
     });
 
-    fastify.post('/verify', {
+    fastify.post('/on', {
         preValidation: [fastify.authenticate],
-        handler: twofaController.verify2FA,
+        handler: twofaController.enable2FA,
     });
 
-    fastify.post('/toggle', {
+    fastify.post('/off', {
         preValidation: [fastify.authenticate],
-        handler: twofaController.toggle2FA,
+        handler: twofaController.disable2FA,
     });
 }
