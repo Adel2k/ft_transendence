@@ -1,8 +1,12 @@
 import { createNavbar } from '../components/navbars.js';
 
-export function render(root: HTMLElement) {
+export async function render(root: HTMLElement) {
   root.innerHTML = '';
-  root.appendChild(createNavbar());
+
+  const navbar = await createNavbar();
+  if (navbar) {
+    root.appendChild(navbar);
+  }
 
   const container = document.createElement('div');
   container.className = 'min-h-screen flex items-center justify-center bg-black';

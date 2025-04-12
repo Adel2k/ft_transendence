@@ -1,8 +1,12 @@
 import { createNavbar } from '../components/navbars.js';
 
-export function render(root: HTMLElement) {
+export async function render(root: HTMLElement) {
   root.innerHTML = '';
-  root.appendChild(createNavbar());
+  
+  const navbar = await createNavbar();
+  if (navbar) {
+    root.appendChild(navbar);
+  }
 
   const div = document.createElement('div');
   div.className = 'p-4';
