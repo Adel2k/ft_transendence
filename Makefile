@@ -36,7 +36,6 @@ build:
 	@echo "$(BG_BLUE)║                       ${BLACK}${BOLD}🎉WELCOME TO🎉$(RESET)$(BG_BLUE)                       ║$(RESET)"
 	@echo "$(BG_BLUE)║                       ${BLACK}${BOLD}FT_Gmbrdilos🦏$(RESET)$(BG_BLUE)                       ║$(RESET)"
 	@echo "$(BG_BLUE)╚════════════════════════════════════════════════════════════╝$(RESET)"
-	@docker ps
 
 front:
 	@echo "${GREEN}${BOLD}Starting front container..${RESET}"
