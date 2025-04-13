@@ -1,21 +1,18 @@
 services:
-
   frontend:
     build: ./frontend/
     container_name: frontend
     restart: always
     depends_on: 
       - backend
-
     networks:
         - app-network
-
-    expose:
-      - 80
 
   backend:
     build: ./backend/
     container_name: backend
+    volumes:
+      - db:/app/database
     restart: always
     env_file:
       - ./backend/.env
@@ -54,3 +51,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  db:
