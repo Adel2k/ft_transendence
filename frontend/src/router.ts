@@ -6,8 +6,8 @@ export async function router() {
 
   const authenticated = await isAuthenticated();
   if (!authenticated && path !== '/' && path !== '/register') {
-    history.pushState(null, '', '/');
-    import('./views/login/index.js').then((m) => m.render(app!));
+    history.pushState(null, '', '/404');
+    import('./views/error/404.js').then((m) => m.render(app!));
     return;
   }
 
@@ -24,7 +24,11 @@ export async function router() {
     case '/game':
       import('./views/game.js').then((m) => m.render(app!));
       break;
+    case '/404':
+      import('./views/error/404.js').then((m) => m.render(app!));
+      break;
     default:
-      app!.innerHTML = '<h1>404 Not Found</h1>';
+      history.pushState(null, '', '/404');
+      import('./views/error/404.js').then((m) => m.render(app!));
   }
 }
