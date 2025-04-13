@@ -20,11 +20,12 @@ export function createFloatingShape(container: HTMLElement): void {
   shape.style.animationDelay = `${delay}s`;
   shape.style.filter = blur ? 'blur(4px)' : 'none';
   shape.style.setProperty('--initial-rotation', `${rotation}deg`);
+  shape.style.userSelect = 'none';
 
   shape.className = `absolute font-bold animate-float-shape pointer-events-none ${zIndex}`;
   container.appendChild(shape);
 
   setTimeout(() => {
     shape.remove();
-  }, 15000);
+  }, 30000);
 }

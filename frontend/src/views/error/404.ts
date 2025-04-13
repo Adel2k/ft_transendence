@@ -13,6 +13,7 @@ export function render(root: HTMLElement) {
 
   const text = document.createElement('h1');
   text.textContent = '404 Not Found';
+  text.style.userSelect = 'none';
   text.className =
     'text-8xl font-bold text-gray-300 animate-float-up-down bg-clip-text bg-gradient-to-r text-shadow-behind';
   container.appendChild(text);
