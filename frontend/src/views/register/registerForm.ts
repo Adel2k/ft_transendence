@@ -1,4 +1,5 @@
 import { register } from './registerService.js';
+import { validateRegisterForm } from './registerValidation.js';
 
 export function setupRegisterForm(root: HTMLElement) {
   const form = root.querySelector('#register-form') as HTMLFormElement;
@@ -6,9 +7,20 @@ export function setupRegisterForm(root: HTMLElement) {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = (document.getElementById('email') as HTMLInputElement).value;
-    const username = (document.getElementById('username') as HTMLInputElement).value;
-    const password = (document.getElementById('password') as HTMLInputElement).value;
+
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const usernameInput = document.getElementById('username') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+
+    const email = emailInput.value.trim();
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    const validationError = validateRegisterForm(email, username, password);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
 
     try {
       await register(email, username, password);

@@ -1,4 +1,5 @@
 import { login } from './loginService.js';
+import { validateLoginForm } from './loginValidation.js';
 
 export function setupLoginForm(root: HTMLElement) {
   const form = root.querySelector('#login-form') as HTMLFormElement;
@@ -6,8 +7,18 @@ export function setupLoginForm(root: HTMLElement) {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = (document.getElementById('email') as HTMLInputElement).value;
-    const password = (document.getElementById('password') as HTMLInputElement).value;
+
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    const validationError = validateLoginForm(email, password);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
 
     try {
       const token = await login(email, password);
