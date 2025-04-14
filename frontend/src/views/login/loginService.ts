@@ -11,7 +11,8 @@ export async function login(email: string, password: string): Promise<string> {
     throw new Error('Invalid credentials');
   }
 
-  const { tempToken } = JSON.parse(await response.text());
+  const { tempToken, message } = JSON.parse(await response.text());
   setCookie('token', tempToken);
+  setCookie('2fa', message === '2FA required.' ? 'true' : 'false');
   return tempToken;
 }

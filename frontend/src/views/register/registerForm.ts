@@ -1,5 +1,6 @@
 import { register } from './registerService.js';
 import { validateRegisterForm } from './registerValidation.js';
+import { showNotification } from '../../components/notification.js';
 
 export function setupRegisterForm(root: HTMLElement) {
   const form = root.querySelector('#register-form') as HTMLFormElement;
@@ -18,18 +19,18 @@ export function setupRegisterForm(root: HTMLElement) {
 
     const validationError = validateRegisterForm(email, username, password);
     if (validationError) {
-      alert(validationError);
+      showNotification(validationError, 'error');
       return;
     }
 
     try {
       await register(email, username, password);
-      alert('Registration successful! Please log in.');
+      showNotification('Registration successful! Please log in.', 'success');
       history.pushState(null, '', '/');
       import('../../router.js').then((m) => m.router());
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      alert('Registration failed: ' + errorMessage);
+      showNotification('Registration failed: ' + errorMessage, 'error');
     }
   });
 

@@ -1,5 +1,6 @@
 import { login } from './loginService.js';
 import { validateLoginForm } from './loginValidation.js';
+import { showNotification } from '../../components/notification.js';
 
 export function setupLoginForm(root: HTMLElement) {
   const form = root.querySelector('#login-form') as HTMLFormElement;
@@ -16,18 +17,19 @@ export function setupLoginForm(root: HTMLElement) {
 
     const validationError = validateLoginForm(email, password);
     if (validationError) {
-      alert(validationError);
+      showNotification(validationError, 'error');
       return;
     }
 
     try {
       const token = await login(email, password);
       localStorage.setItem('token', token);
+      showNotification('Login successful!', 'success');
       history.pushState(null, '', '/home');
       import('../../router.js').then((m) => m.router());
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      alert('Login failed: ' + errorMessage);
+      showNotification('Login failed: ' + errorMessage, 'error');
     }
   });
 
