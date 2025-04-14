@@ -1,5 +1,7 @@
 import prisma from '../db/prisma.js';
 
+const AVATAR_BASE = process.env.DEFAULT_AVATAR;
+
 const me = async (req, reply) => {
     const user = await prisma.user.findUnique({
         where: { id: req.user.id },
