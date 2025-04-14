@@ -1,3 +1,5 @@
+import { setCookie } from '../../utils/cookies.js';
+
 export async function login(email: string, password: string): Promise<string> {
   const response = await fetch('/api/auth/login', {
     method: 'POST',
@@ -9,6 +11,7 @@ export async function login(email: string, password: string): Promise<string> {
     throw new Error('Invalid credentials');
   }
 
-  const { token } = await response.json();
-  return token;
+  const { tempToken } = JSON.parse(await response.text());
+  setCookie('token', tempToken);
+  return tempToken;
 }

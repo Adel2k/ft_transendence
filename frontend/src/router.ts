@@ -1,10 +1,11 @@
-import { isAuthenticated } from './utils/auth.js';
+import { getCookie } from './utils/cookies.js';
 
 export async function router() {
   const app = document.getElementById('app');
   const path = window.location.pathname;
 
-  const authenticated = await isAuthenticated();
+  const token = getCookie('token');
+  const authenticated = !!token;
 
   if (authenticated && (path === '/' || path === '/register')) {
     history.pushState(null, '', '/home');
@@ -27,6 +28,9 @@ export async function router() {
       break;
     case '/home':
       import('./views/home/index.js').then((m) => m.render(app!));
+      break;
+    case '/profile':
+      import('./views/profile/index.js').then((m) => m.render(app!));
       break;
     case '/game':
       import('./views/game.js').then((m) => m.render(app!));

@@ -1,10 +1,12 @@
+import { getCookie, setCookie, deleteCookie } from './cookies.js';
+
 export async function isAuthenticated(): Promise<boolean> {
-  const token = localStorage.getItem('token');
+  const token = getCookie('token');
   return !!token;
 }
 
 export function logout() {
-  localStorage.removeItem('token');
+  deleteCookie('token');
   history.pushState(null, '', '/');
   window.location.reload();
 }

@@ -1,6 +1,11 @@
-import { router } from './router.js'
+import { router } from './router.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-  router()
-  window.addEventListener('popstate', router)
-})
+  if (!sessionStorage.getItem('initialized')) {
+    sessionStorage.clear();
+    sessionStorage.setItem('initialized', 'true');
+  }
+
+  router();
+  window.addEventListener('popstate', router);
+});

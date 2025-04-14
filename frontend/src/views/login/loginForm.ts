@@ -23,7 +23,6 @@ export function setupLoginForm(root: HTMLElement) {
     try {
       const token = await login(email, password);
       localStorage.setItem('token', token);
-      alert('Login successful!');
       history.pushState(null, '', '/home');
       import('../../router.js').then((m) => m.router());
     } catch (err) {
