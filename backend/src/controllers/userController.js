@@ -30,7 +30,7 @@ const updateAvatar = async (req, reply) => {
         const newAvatar =
             avatarUrl && avatarUrl.trim() !== ''
                 ? avatarUrl
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}`;
+                : `${AVATAR_BASE}${encodeURIComponent(user.username)}`;
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },
