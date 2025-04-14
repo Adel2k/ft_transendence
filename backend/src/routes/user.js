@@ -25,6 +25,11 @@ async function userRoutes(fastify, options) {
         preValidation: [fastify.authenticate],
         handler: userController.getMatchHistory,
     });
+
+    fastify.patch('/username', {
+        preValidation: [fastify.authenticate],
+        handler: userController.updateUsername,
+    });
 }
 
 export default userRoutes;
