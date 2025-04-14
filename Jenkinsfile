@@ -23,9 +23,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo 'Running tests...'
-                // Add test commands for backend and frontend here
+                // Run backend tests
                 sh 'docker-compose -f $DOCKER_COMPOSE_FILE run --rm backend npm test'
-                sh 'docker-compose -f $DOCKER_COMPOSE_FILE run --rm frontend npm test'
+                // Run frontend tests
+                sh 'docker-compose -f $DOCKER_COMPOSE_FILE run --rm frontend npm run test'
             }
         }
 
