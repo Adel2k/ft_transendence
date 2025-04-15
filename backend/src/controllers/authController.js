@@ -61,7 +61,7 @@ const login = async (req, reply) => {
                 email: user.email,
                 username: user.username,
             },
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+            { expiresIn: process.env.JWT_EXPIRES_IN }
         );
 
         reply.send({ token });

@@ -1,8 +1,8 @@
 import { showNotification } from '../../components/notification.js';
 
 function validateFile(file: File): string | null {
-  if (file.size > 1 * 1024 * 1024) {
-    return 'File size must not exceed 1 MB.';
+  if (file.size > 3 * 1024 * 1024) {
+    return 'File size must not exceed 3 MB.';
   }
 
   if (!file.type.startsWith('image/')) {
@@ -12,10 +12,11 @@ function validateFile(file: File): string | null {
   return null;
 }
 
-async function uploadAvatar(file: File, token: string): Promise<string> {
+async function uploadAvatar(file: File, token: string) {
   const formData = new FormData();
-  formData.append('avatar', file);
+  formData.append('avatar', file, file.name);
 
+  console.log('Uploading avatar:', formData);
   const response = await fetch('/api/user/avatar', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
@@ -68,6 +69,7 @@ export function createAvatarSection(avatarUrl: string): HTMLElement {
         throw new Error('No token found');
       }
 
+      showNotification('Uploading avatar...', 'info');
       const newAvatarUrl = await uploadAvatar(file, token);
       avatar.src = newAvatarUrl;
       showNotification('Avatar uploaded successfully!', 'success');

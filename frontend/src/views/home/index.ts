@@ -37,6 +37,5 @@ export async function render(root: HTMLElement) {
     root.innerHTML =
       '<p class="text-red-500">Failed to load profile page. Please try again later.</p>';
     sessionStorage.clear();
-    sessionStorage.setItem('initialized', 'false');
   }
 }

@@ -22,11 +22,20 @@ export function setupLoginForm(root: HTMLElement) {
     }
 
     try {
-      const token = await login(email, password);
-      localStorage.setItem('token', token);
-      showNotification('Login successful!', 'success');
-      history.pushState(null, '', '/home');
-      import('../../router.js').then((m) => m.router());
+      const is2FAEnabled = await login(email, password);
+
+      if (is2FAEnabled) {
+        const twofaModal = document.getElementById('twofa-modal') as HTMLDivElement;
+        if (twofaModal) { 
+          twofaModal.classList.remove('hidden');
+        }
+
+        showNotification('2FA is enabled. Please enter your 2FA code.', 'info');
+      } else {
+        showNotification('Login successful!', 'success');
+        history.pushState(null, '', '/home');
+        import('../../router.js').then((m) => m.router());
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       showNotification('Login failed: ' + errorMessage, 'error');

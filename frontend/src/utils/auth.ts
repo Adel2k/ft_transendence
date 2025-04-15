@@ -1,4 +1,4 @@
-import { getCookie, setCookie, deleteCookie } from './cookies.js';
+import { getCookie, deleteCookie } from './cookies.js';
 
 export async function isAuthenticated(): Promise<boolean> {
   const token = getCookie('token');

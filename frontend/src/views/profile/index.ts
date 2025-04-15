@@ -40,7 +40,7 @@ export async function render(root: HTMLElement) {
     const leftColumn = document.createElement('div');
     leftColumn.className =
       'flex flex-col gap-8 w-full md:w-1/3 bg-black bg-opacity-55 p-10 rounded-lg shadow-2xl text-gray-100';
-    leftColumn.append(avatarSection, usernameSection, statsSection, twoFASection);
+    leftColumn.append( avatarSection, usernameSection, statsSection, twoFASection);
 
     const rightColumn = document.createElement('div');
     rightColumn.className =
@@ -48,6 +48,7 @@ export async function render(root: HTMLElement) {
     rightColumn.append(friendsSection, historySection);
 
     container.append(leftColumn, rightColumn);
+    container.style.userSelect = 'none';
     root.appendChild(container);
 
     const navbar = await createNavbar();
@@ -59,6 +60,5 @@ export async function render(root: HTMLElement) {
     root.innerHTML =
       '<p class="text-red-500">Failed to load profile page. Please try again later.</p>';
     sessionStorage.clear();
-    sessionStorage.setItem('initialized', 'false');
   }
 }
