@@ -5,7 +5,14 @@ export async function router() {
   const path = window.location.pathname;
 
   const token = getCookie('token');
-  const authenticated = !!token;
+  let authenticated: boolean;
+  if (getCookie('2fa') === 'true' && getCookie('2faCode') === 'true') {
+    authenticated = !!token;
+  } else if (getCookie('2fa') === 'true' && getCookie('2faCode') === 'false') {
+    authenticated = !token;
+  } else {
+    authenticated = !!token;
+  }
 
   if (authenticated && (path === '/' || path === '/register')) {
     history.pushState(null, '', '/home');

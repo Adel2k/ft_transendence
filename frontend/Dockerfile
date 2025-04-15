@@ -6,7 +6,6 @@ COPY package*.json ./
 
 RUN npm install
 RUN npm install tailwindcss-textshadow
-
 COPY . .
 
 RUN npm run build
@@ -15,6 +14,7 @@ FROM nginx:alpine
 
 COPY --from=build /app/index.html /usr/share/nginx/html/
 COPY --from=build /app/dist /usr/share/nginx/html/dist
+RUN  mkdir -p /usr/share/nginx/html/image/ && chmod 777 /usr/share/nginx/html/image/
 
 COPY ./default.conf /etc/nginx/conf.d/default.conf
 
