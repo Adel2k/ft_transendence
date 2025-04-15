@@ -42,9 +42,15 @@ export async function render(root: HTMLElement) {
   verifyButton.className =
     'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded';
 
+  const cancelButton = document.createElement('button');
+  cancelButton.textContent = 'Cancel';
+  cancelButton.className =
+    'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded';
+
   modalContent.appendChild(modalTitle);
   modalContent.appendChild(twofaCodeInput);
   modalContent.appendChild(verifyButton);
+  modalContent.appendChild(cancelButton);
   modal.appendChild(modalContent);
   modal.classList.add('hidden');
   root.appendChild(modal);
@@ -78,7 +84,7 @@ export async function render(root: HTMLElement) {
       setCookie('token', token);
       setCookie('2faCode', 'true');
       showNotification('2FA verified successfully!', 'success');
-      modal.classList.add('hidden'); // Закрываем модальное окно
+      modal.classList.add('hidden');
       history.pushState(null, '', '/home');
       import('../home/index.js').then((m) => m.render(root));
     } catch (error) {
@@ -86,4 +92,9 @@ export async function render(root: HTMLElement) {
       showNotification('Failed to verify 2FA. Please try again.', 'error');
     }
   });
+
+  cancelButton.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  }
+  );
 }

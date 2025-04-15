@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2022",
     "module": "es2020",
     "moduleResolution": "node",
+    "lib": ["dom", "es2022", "dom.iterable"],
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
