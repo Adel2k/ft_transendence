@@ -59,9 +59,15 @@ down:
 	@echo "${GREEN}✅ Done...${RESET}"
 
 clean: down
-	@echo "${RED}${BOLD}Cleaning up containers, volumes, and networks...${RESET}"
+	@echo "${RED}${BOLD}Cleaning up containers, images and networks...${RESET}"
+	@docker-compose down --rmi all
+	@docker system prune --force --all
+	@echo "${GREEN}✅ Done...${RESET}"
+
+fclean: down
+	@echo "${RED}${BOLD}Cleaning up containers, volumes, images and networks...${RESET}"
 	@docker-compose down --rmi all
 	@docker system prune --volumes --force --all
 	@echo "${GREEN}✅ Done...${RESET}"
 
-.PHONY: all re up down front backend nginx build clean
+.PHONY: all re up down front backend nginx build clean fclean

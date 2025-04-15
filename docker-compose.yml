@@ -12,7 +12,7 @@ services:
     build: ./backend/
     container_name: backend
     volumes:
-      - db:/app/database
+      - db:/app/src/prisma
     restart: always
     env_file:
       - ./backend/.env
