@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -11,6 +11,8 @@ COPY . .
 WORKDIR /app/src
 
 RUN npx prisma generate 
+
+RUN mkdir -p ./prisma/images
 
 WORKDIR /app
 
