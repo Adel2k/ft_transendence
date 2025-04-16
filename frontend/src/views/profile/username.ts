@@ -1,5 +1,5 @@
-import { createUsernameModal } from './usernameUI.js';
-import { showNotification } from '../../components/notification.js';
+import { createUsernameModal } from './usernameUI';
+import { showNotification } from '../../components/notification';
 
 export function createUsernameSection(username: string): HTMLElement {
   const container = document.createElement('div');

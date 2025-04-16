@@ -1,4 +1,5 @@
-import { router } from './router.js';
+import './styles/input.css';
+import { router } from './router';
 
 window.addEventListener('DOMContentLoaded', () => {
   if (!sessionStorage.getItem('initialized')) {

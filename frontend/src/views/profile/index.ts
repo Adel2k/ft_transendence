@@ -1,12 +1,12 @@
-import { createNavbar } from '../../components/navbars.js';
-import { createAvatarSection } from './avatar.js';
-import { createUsernameSection } from './username.js';
-import { createStatsSection } from './stats.js';
-import { createTwoFASection } from './twofa.js';
-import { createFriendsSection } from './friends.js';
-import { createHistorySection } from './history.js';
-import { fetchUserData } from './dataFetch.js';
-import { getCookie } from '../../utils/cookies.js';
+import { createNavbar } from '../../components/navbars';
+import { createAvatarSection } from './avatar';
+import { createUsernameSection } from './username';
+import { createStatsSection } from './stats';
+import { createTwoFASection } from './twofa';
+import { createFriendsSection } from './friends';
+import { createHistorySection } from './history';
+import { fetchUserData } from './dataFetch';
+import { getCookie } from '../../utils/cookies';
 
 export async function render(root: HTMLElement) {
   if (!root) {

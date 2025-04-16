@@ -1,4 +1,4 @@
-import { setCookie } from '../../utils/cookies.js';
+import { setCookie } from '../../utils/cookies';
 
 export async function login(email: string, password: string): Promise<boolean> {
   const response = await fetch('/api/auth/login', {

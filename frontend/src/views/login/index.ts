@@ -1,7 +1,7 @@
-import { getCookie, setCookie } from '../../utils/cookies.js';
-import { createLoginUI } from './loginUI.js';
-import { setupLoginForm } from './loginForm.js';
-import { showNotification } from '../../components/notification.js';
+import { getCookie, setCookie } from '../../utils/cookies';
+import { createLoginUI } from './loginUI';
+import { setupLoginForm } from './loginForm';
+import { showNotification } from '../../components/notification';
 
 export async function render(root: HTMLElement) {
   if (!root) {
@@ -86,7 +86,7 @@ export async function render(root: HTMLElement) {
       showNotification('2FA verified successfully!', 'success');
       modal.classList.add('hidden');
       history.pushState(null, '', '/home');
-      import('../home/index.js').then((m) => m.render(root));
+      import('../home/index').then((m) => m.render(root));
     } catch (error) {
       console.error('Error verifying 2FA:', error);
       showNotification('Failed to verify 2FA. Please try again.', 'error');

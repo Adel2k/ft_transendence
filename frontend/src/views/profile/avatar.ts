@@ -1,4 +1,4 @@
-import { showNotification } from '../../components/notification.js';
+import { showNotification } from '../../components/notification';
 
 function validateFile(file: File): string | null {
   if (file.size > 3 * 1024 * 1024) {

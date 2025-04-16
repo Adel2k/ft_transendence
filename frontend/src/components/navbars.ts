@@ -1,5 +1,5 @@
-import { isAuthenticated, logout } from '../utils/auth.js';
-import { getIcon } from '../icons/getIcon.js';
+import { isAuthenticated, logout } from '../utils/auth';
+import { getIcon } from '../icons/getIcon';
 
 export async function createNavbar(): Promise<HTMLElement | null> {
   const authenticated = await isAuthenticated();

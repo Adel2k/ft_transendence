@@ -1,4 +1,4 @@
-import { createFloatingShape } from '../shape/error.js';
+import { createFloatingShape } from '../shape/error';
 
 export function render(root: HTMLElement) {
   root.innerHTML = '';

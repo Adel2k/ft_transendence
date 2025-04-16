@@ -1,5 +1,3 @@
-import { getCookie } from "../../utils/cookies";
-
 export async function fetchUserData(token: string) {
    const avatarResponse = await fetch('/api/user/avatar', {
     method: 'PATCH',

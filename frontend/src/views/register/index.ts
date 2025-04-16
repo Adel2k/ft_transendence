@@ -1,6 +1,5 @@
-import { createNavbar } from '../../components/navbars.js';
-import { createRegisterUI } from './registerUI.js';
-import { setupRegisterForm } from './registerForm.js';
+import { createRegisterUI } from './registerUI';
+import { setupRegisterForm } from './registerForm';
 
 export async function render(root: HTMLElement) {
   root.innerHTML = '';

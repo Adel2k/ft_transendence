@@ -1,8 +1,8 @@
-import { createNavbar } from '../../components/navbars.js';
-import { createBackground } from './background.js';
-import { createPaddle } from './paddle.js';
-import { createContent } from './content.js';
-import { getCookie } from '../../utils/cookies.js';
+import { createNavbar } from '../../components/navbars';
+import { createBackground } from './background';
+import { createPaddle } from './paddle';
+import { createContent } from './content';
+import { getCookie } from '../../utils/cookies';
 
 export async function render(root: HTMLElement) {
   if (!root) {

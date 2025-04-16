@@ -1,4 +1,4 @@
-import { getCookie } from './utils/cookies.js';
+import { getCookie } from './utils/cookies';
 
 export async function router() {
   const app = document.getElementById('app');
@@ -16,37 +16,37 @@ export async function router() {
 
   if (authenticated && (path === '/' || path === '/register')) {
     history.pushState(null, '', '/home');
-    import('./views/home/index.js').then((m) => m.render(app!));
+    import('./views/home/index').then((m) => m.render(app!));
     return;
   }
 
   if (!authenticated && path !== '/' && path !== '/register') {
     history.pushState(null, '', '/404');
-    import('./views/error/404.js').then((m) => m.render(app!));
+    import('./views/error/404').then((m) => m.render(app!));
     return;
   }
 
   switch (path) {
     case '/':
-      import('./views/login/index.js').then((m) => m.render(app!));
+      import('./views/login/index').then((m) => m.render(app!));
       break;
     case '/register':
-      import('./views/register/index.js').then((m) => m.render(app!));
+      import('./views/register/index').then((m) => m.render(app!));
       break;
     case '/home':
-      import('./views/home/index.js').then((m) => m.render(app!));
+      import('./views/home/index').then((m) => m.render(app!));
       break;
     case '/profile':
-      import('./views/profile/index.js').then((m) => m.render(app!));
+      import('./views/profile/index').then((m) => m.render(app!));
       break;
     case '/game':
-      import('./views/game.js').then((m) => m.render(app!));
+      import('./views/game/index').then((m) => m.render(app!));
       break;
     case '/404':
-      import('./views/error/404.js').then((m) => m.render(app!));
+      import('./views/error/404').then((m) => m.render(app!));
       break;
     default:
       history.pushState(null, '', '/404');
-      import('./views/error/404.js').then((m) => m.render(app!));
+      import('./views/error/404').then((m) => m.render(app!));
   }
 }

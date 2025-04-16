@@ -9,7 +9,7 @@ export function validatePassword(password: string): boolean {
 }
 
 export function validateUsername(username: string): boolean {
-  const usernameRegex = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z]).{5,}$/; // Минимум 5 символов, минимум 3 буквы
+  const usernameRegex = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z]).{5,}$/;
   return usernameRegex.test(username);
 }
 

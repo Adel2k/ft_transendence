@@ -1,4 +1,4 @@
-import { createFloatingShape } from '../shape/shapes.js';
+import { createFloatingShape } from '../shape/shapes';
 
 export function createRegisterUI(): HTMLElement {
   const div = document.createElement('div');

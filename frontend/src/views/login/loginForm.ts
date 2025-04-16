@@ -1,6 +1,6 @@
-import { login } from './loginService.js';
-import { validateLoginForm } from './loginValidation.js';
-import { showNotification } from '../../components/notification.js';
+import { login } from './loginService';
+import { validateLoginForm } from './loginValidation';
+import { showNotification } from '../../components/notification';
 
 export function setupLoginForm(root: HTMLElement) {
   const form = root.querySelector('#login-form') as HTMLFormElement;
@@ -34,7 +34,7 @@ export function setupLoginForm(root: HTMLElement) {
       } else {
         showNotification('Login successful!', 'success');
         history.pushState(null, '', '/home');
-        import('../../router.js').then((m) => m.router());
+        import('../../router').then((m) => m.router());
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -44,6 +44,6 @@ export function setupLoginForm(root: HTMLElement) {
 
   registerButton.addEventListener('click', () => {
     history.pushState(null, '', '/register');
-    import('../../router.js').then((m) => m.router());
+    import('../../router').then((m) => m.router());
   });
 }

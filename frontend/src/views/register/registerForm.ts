@@ -1,6 +1,6 @@
-import { register } from './registerService.js';
-import { validateRegisterForm } from './registerValidation.js';
-import { showNotification } from '../../components/notification.js';
+import { register } from './registerService';
+import { validateRegisterForm } from './registerValidation';
+import { showNotification } from '../../components/notification';
 
 export function setupRegisterForm(root: HTMLElement) {
   const form = root.querySelector('#register-form') as HTMLFormElement;

@@ -1,5 +1,5 @@
-import { showNotification } from '../../components/notification.js';
-import { setCookie } from '../../utils/cookies.js';
+import { showNotification } from '../../components/notification';
+import { setCookie } from '../../utils/cookies';
 
 export function createTwoFASection(is2FAEnabled: boolean): HTMLElement {
   const container = document.createElement('div');
@@ -101,7 +101,6 @@ export function createTwoFASection(is2FAEnabled: boolean): HTMLElement {
         }
 
         const { qr, base32 } = await response.json();
-        console.log('Base32 code:', base32);
 
         modalTitle.textContent = 'Enable 2FA';
         qrImage.src = qr;
