@@ -12,7 +12,6 @@ export async function createNavbar(): Promise<HTMLElement | null> {
     { href: '/home', label: 'Home', icon: 'home' },
     { href: '/game', label: 'Matchmaking', icon: 'game' },
     { href: '/profile', label: 'Profile', icon: 'profile' },
-    { href: '/chat', label: 'Chat', icon: 'chat' },
     { href: '/settings', label: 'Settings', icon: 'settings' },
   ];
 
@@ -25,7 +24,7 @@ export async function createNavbar(): Promise<HTMLElement | null> {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       history.pushState(null, '', href);
-      import('../router.js').then((m) => m.router());
+      import('../router').then((m) => m.router());
     });
     nav.appendChild(link);
   });

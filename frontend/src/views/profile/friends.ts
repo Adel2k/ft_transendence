@@ -1,4 +1,4 @@
-export function createFriendsSection(friends: Array<{ username: string; isOnline: boolean }>): HTMLElement {
+export function createFriendsSection(friends: Array<{ username: string; isOnline: boolean; avatarUrl: string }>): HTMLElement {
   const container = document.createElement('div');
   container.className = 'flex flex-col items-center gap-4';
 
@@ -6,18 +6,30 @@ export function createFriendsSection(friends: Array<{ username: string; isOnline
   title.textContent = 'Friends';
   title.className = 'text-xl font-bold';
 
-  const list = document.createElement('ul');
-  list.className = 'w-full';
-
+  const scrollContainer = document.createElement('div');
+  scrollContainer.className = `flex overflow-x-scroll gap-4 w-full p-4 scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-[#c084fc] scrollbar-track-transparent hover:scrollbar-thumb-[#a855f7]`;
+  
   friends.forEach((friend) => {
-    const listItem = document.createElement('li');
-    listItem.textContent = `${friend.username} (${friend.isOnline ? 'Online' : 'Offline'})`;
-    listItem.className = `p-2 rounded ${friend.isOnline ? 'bg-green-500' : 'bg-gray-500'} text-white`;
-    list.appendChild(listItem);
+    const friendCard = document.createElement('div');
+    friendCard.className = 'flex flex-col items-center gap-4 min-w-[135px]';
+
+    const avatar = document.createElement('img');
+    avatar.src = friend.avatarUrl;
+    avatar.alt = `${friend.username}'s avatar`;
+    avatar.className = 'w-28 h-28 rounded-full border-2';
+    avatar.style.borderColor = friend.isOnline ? 'green' : 'darkred';
+
+    const name = document.createElement('span');
+    name.textContent = friend.username;
+    name.className = `text-sm font-medium ${friend.isOnline ? 'text-green-500' : 'text-red-700'}`;
+
+    friendCard.appendChild(avatar);
+    friendCard.appendChild(name);
+    scrollContainer.appendChild(friendCard);
   });
 
   container.appendChild(title);
-  container.appendChild(list);
+  container.appendChild(scrollContainer);
 
   return container;
 }

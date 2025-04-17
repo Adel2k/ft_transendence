@@ -39,10 +39,13 @@ export async function router() {
     case '/profile':
       import('./views/profile/index').then((m) => m.render(app!));
       break;
-    case '/game':
-      import('./views/game/index').then((m) => m.render(app!));
-      break;
-    case '/404':
+      case '/game':
+        import('./views/game/index').then((m) => m.render(app!));
+        break;
+      case '/settings':
+        import('./views/settings/index').then((m) => m.render(app!));
+        break;
+      case '/404':
       import('./views/error/404').then((m) => m.render(app!));
       break;
     default:

@@ -1,16 +1,14 @@
-import homeIcon from './homeIcon.js';
-import gameIcon from './gameIcon.js';
-import profileIcon from './profileIcon.js';
-import chatIcon from './chatIcon.js';
-import settingsIcon from './settingsIcon.js';
-import logoutIcon from './logoutIcon.js';
+import homeIcon from './homeIcon';
+import gameIcon from './gameIcon';
+import profileIcon from './profileIcon';
+import settingsIcon from './settingsIcon';
+import logoutIcon from './logoutIcon';
 
 export function getIcon(name: string): string {
   const icons: Record<string, () => string> = {
     home: homeIcon,
     game: gameIcon,
     profile: profileIcon,
-    chat: chatIcon,
     settings: settingsIcon,
     logout: logoutIcon,
   };

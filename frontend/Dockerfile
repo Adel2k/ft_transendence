@@ -6,8 +6,8 @@ COPY package*.json ./
 
 RUN npm install
 
-RUN npm install tailwindcss postcss autoprefixer
-RUN npm install tailwindcss-textshadow
+RUN npm install tailwindcss  tailwindcss-textshadow tailwind-scrollbar
+RUN npm install postcss@latest postcss-nested@latest autoprefixer@latest
 RUN npm install babylonjs @babylonjs/core @babylonjs/gui @babylonjs/loaders
 
 COPY . .
