@@ -1,4 +1,4 @@
-import { createPongGame } from './pong';
+import { createPongScene } from './createScene';
 import { createNavbar } from '../../components/navbars';
 
 export async function render(root: HTMLElement) {
@@ -6,10 +6,10 @@ export async function render(root: HTMLElement) {
 
     const canvas = document.createElement('canvas');
     canvas.id = 'gameCanvas';
-    canvas.className = 'w-full h-full';
+    canvas.className = 'w-screen h-screen';
     root.appendChild(canvas);
 
-    createPongGame(canvas);
+    createPongScene(canvas);
 
     const navbar = await createNavbar();
     if (navbar) {
