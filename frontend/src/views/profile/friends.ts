@@ -7,7 +7,7 @@ export function createFriendsSection(friends: Array<{ username: string; isOnline
   title.className = 'text-xl font-bold';
 
   const scrollContainer = document.createElement('div');
-  scrollContainer.className = `flex overflow-x-scroll gap-4 w-full p-4 scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-[#c084fc] scrollbar-track-transparent hover:scrollbar-thumb-[#a855f7]`;
+  scrollContainer.className = `flex overflow-x-scroll gap-4 w-full p-4 scrollbar-transparent scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100`;
   
   friends.forEach((friend) => {
     const friendCard = document.createElement('div');

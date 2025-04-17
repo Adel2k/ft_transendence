@@ -2,14 +2,12 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json ./
 
 RUN npm install
 
-RUN npm install --save-dev vite
-RUN npm install tailwindcss  tailwindcss-textshadow tailwind-scrollbar
-RUN npm install @tailwindcss/postcss7-compat
-RUN npm install postcss@latest postcss-nested@latest autoprefixer@latest
+RUN npm install tailwindcss  tailwindcss-textshadow 
+RUN npm install postcss autoprefixer
 RUN npm install babylonjs @babylonjs/core @babylonjs/gui @babylonjs/loaders
 
 
