@@ -7,11 +7,11 @@ export function createTwoFASection(is2FAEnabled: boolean): HTMLElement {
 
   const toggleLabel = document.createElement('p');
   toggleLabel.textContent = `2FA is currently ${is2FAEnabled ? 'Enabled' : 'Disabled'}`;
-  toggleLabel.className = 'text-lg font-bold';
+  toggleLabel.className = 'text-lg font-bold ml-8';
 
   const toggleButton = document.createElement('button');
   toggleButton.textContent = is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA';
-  toggleButton.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded';
+  toggleButton.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded  ml-8';
 
   const modal = document.createElement('div');
   modal.id = 'twofa-modal';

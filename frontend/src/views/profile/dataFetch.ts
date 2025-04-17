@@ -1,11 +1,4 @@
 export async function fetchUserData(token: string) {
-   const avatarResponse = await fetch('/api/user/avatar', {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({}),
-  });
-  if (!avatarResponse.ok) throw new Error('Failed to update avatar');
-  
   const response = await fetch('/api/user/me', {
     headers: { Authorization: `Bearer ${token}` },
   });

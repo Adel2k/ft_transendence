@@ -17,12 +17,6 @@ export async function render(root: HTMLElement) {
       throw new Error('No token found');
     }
 
-    const response = await fetch('/api/user/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) throw new Error('Failed to fetch user data');
-    const { user } = await response.json();
-
     const background = createBackground();
     background.appendChild(createPaddle());
     background.appendChild(createContent());

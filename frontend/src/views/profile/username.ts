@@ -7,11 +7,11 @@ export function createUsernameSection(username: string): HTMLElement {
 
   const usernameDisplay = document.createElement('p');
   usernameDisplay.textContent = `Username: ${username}`;
-  usernameDisplay.className = 'text-lg font-bold text-white-700';
+  usernameDisplay.className = 'text-lg font-bold text-white-700 ml-8';
 
   const editButton = document.createElement('button');
   editButton.textContent = 'Edit Username';
-  editButton.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded';
+  editButton.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded ml-8';
 
   const modal = createUsernameModal(username, async (newUsername) => {
     const token = sessionStorage.getItem('token');

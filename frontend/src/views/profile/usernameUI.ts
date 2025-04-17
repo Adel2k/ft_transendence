@@ -1,4 +1,4 @@
-import { showNotification } from '../../components/notification.js';
+import { showNotification } from '../../components/notification';
 
 export function createUsernameModal(
   currentUsername: string,
