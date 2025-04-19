@@ -2,6 +2,9 @@ import Fastify from 'fastify';
 import fs from 'fs';
 import path from 'path';
 import 'dotenv/config';
+import multipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
+import { fileURLToPath } from 'url';
 
 import jwtPlugin from './plugins/jwt.js';
 import registerRoutes from './routes/index.js';
@@ -16,8 +19,16 @@ const fastify = Fastify({
 });
 
 fastify.register(formbody);
+fastify.register(multipart);
 fastify.register(jwtPlugin);
 fastify.register(registerRoutes);
+
+fastify.register(fastifyStatic, {
+    root: path.join(fileURLToPath(import.meta.url), '../../public'),
+    prefix: '/',
+  });
+
+console.log('STATIC ROOT =', path.join(fileURLToPath(import.meta.url), '../public'));
 
 fastify.listen({
     port: 3000,

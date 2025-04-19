@@ -6,6 +6,8 @@ COPY package*.json ./
 
 RUN npm install
 
+RUN npm install @fastify/static
+
 COPY . .
 
 WORKDIR /app/src

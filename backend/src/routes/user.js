@@ -11,6 +11,11 @@ async function userRoutes(fastify, options) {
         handler: userController.updateAvatar,
     });
 
+    fastify.post('/avatar', {
+        preValidation: [fastify.authenticate],
+        handler: userController.uploadAvatar,
+    });
+
     fastify.post('/friends/:friendId', {
         preValidation: [fastify.authenticate],
         handler: userController.addFriend,

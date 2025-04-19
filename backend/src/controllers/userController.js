@@ -1,4 +1,7 @@
 import prisma from '../db/prisma.js';
+import fs from 'fs/promises';
+import path from 'path';
+import crypto from 'crypto';
 
 const AVATAR_BASE = process.env.DEFAULT_AVATAR;
 
@@ -19,6 +22,47 @@ const me = async (req, reply) => {
     reply.send({ user });
 };
 
+const uploadAvatar = async (req, reply) => {
+    const userId = req.user.id;
+    const data = await req.file();
+
+    if (!data || !data.filename) {
+        return reply.status(400).send({ error: 'No file uploaded' });
+    }
+
+    const ext = path.extname(data.filename);
+    const uniqueName = crypto.randomUUID() + ext;
+    const filename = uniqueName;
+    const savePath = `/app/public/avatars/${filename}`;
+    const publicUrl = `/avatars/${filename}`;
+
+    try {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+
+        if (user.avatarUrl?.startsWith('/avatars/')) {
+            const oldFile = path.join('/app/public', user.avatarUrl);
+            try {
+                await fs.unlink(oldFile);
+            } catch (e) {
+                console.warn(`Old avatar not found or already deleted: ${oldFile}`);
+            }
+        }
+
+        await fs.mkdir('/app/public/avatars', { recursive: true });
+        await fs.writeFile(savePath, await data.toBuffer());
+
+        const updated = await prisma.user.update({
+            where: { id: userId },
+            data: { avatarUrl: publicUrl },
+        });
+
+        reply.send({ message: 'Avatar uploaded', avatarUrl: updated.avatarUrl });
+    } catch (err) {
+        console.error(err);
+        reply.status(500).send({ error: 'Failed to upload avatar' });
+    }
+};
+
 const updateAvatar = async (req, reply) => {
     const userId = req.user.id;
     const { avatarUrl } = req.body;
@@ -28,6 +72,18 @@ const updateAvatar = async (req, reply) => {
 
         if (!user)
             return reply.status(404).send({ error: 'User not found.' });
+
+        if (
+            user.avatarUrl?.startsWith('/avatars/') &&
+            (!avatarUrl || avatarUrl.startsWith('http'))
+        ) {
+            const oldFile = path.join('/app/public', user.avatarUrl);
+            try {
+                await fs.unlink(oldFile);
+            } catch (e) {
+                console.warn(`Old avatar not found or already deleted: ${oldFile}`);
+            }
+        }
 
         const newAvatar =
             avatarUrl && avatarUrl.trim() !== ''
@@ -187,6 +243,7 @@ const updateUsername = async (req, reply) => {
 
 export default {
     me,
+    uploadAvatar,
     updateAvatar,
     addFriend,
     listFriends,
