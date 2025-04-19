@@ -2,17 +2,37 @@ import bcrypt from 'bcryptjs';
 import prisma from '../db/prisma.js';
 import {app} from '../server.js';
 import speakeasy from 'speakeasy';
+import { validateEmail, validatePassword } from '../utils/validators.js';
 
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
 const AVATAR_BASE = process.env.DEFAULT_AVATAR;
 
 const register = async (req, reply) => {
-    const {email, username, password, avatarUrl} = req.body;
+    const { email, username, password, avatarUrl } = req.body;
 
-    if (!email || !username || !password)
-        return reply.status(400).send({error: 'All fields are required.'});
+    if (!email || !username || !password) {
+        return reply.status(400).send({ error: 'All fields are required.' });
+    }
+
+    if (!validateEmail(email)) {
+        return reply.status(400).send({ error: 'Invalid email format.' });
+    }
+
+    if (!validatePassword(password)) {
+        return reply.status(400).send({ error: 'Password must be at least 8 characters and include one uppercase letter.' });
+    }
 
     try {
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [{ email }, { username }],
+            },
+        });
+
+        if (existingUser) {
+            return reply.status(409).send({ error: 'Email or username already in use.' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
         const user = await prisma.user.create({
@@ -24,13 +44,10 @@ const register = async (req, reply) => {
             },
         });
 
-        reply.code(201).send({message: 'User registered successfully!'});
+        reply.code(201).send({ message: 'User registered successfully!' });
     } catch (err) {
-        if (err.code === 'P2002') {
-            reply.status(409).send({error: 'Email or username already in use.'});
-        } else {
-            reply.status(500).send({error: 'Registration failed.'});
-        }
+        console.error(err);
+        reply.status(500).send({ error: 'Registration failed.' });
     }
 };
 
