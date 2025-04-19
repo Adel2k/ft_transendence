@@ -32,10 +32,22 @@ const uploadAvatar = async (req, reply) => {
 
     const ext = path.extname(data.filename);
     const uniqueName = crypto.randomUUID() + ext;
-    const savePath = `/app/public/avatars/${uniqueName}`;
-    const publicUrl = `/avatars/${uniqueName}`;
+    const filename = uniqueName;
+    const savePath = `/app/public/avatars/${filename}`;
+    const publicUrl = `/avatars/${filename}`;
 
     try {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+
+        if (user.avatarUrl?.startsWith('/avatars/')) {
+            const oldFile = path.join('/app/public', user.avatarUrl);
+            try {
+                await fs.unlink(oldFile);
+            } catch (e) {
+                console.warn(`Old avatar not found or already deleted: ${oldFile}`);
+            }
+        }
+
         await fs.mkdir('/app/public/avatars', { recursive: true });
         await fs.writeFile(savePath, await data.toBuffer());
 
@@ -60,6 +72,18 @@ const updateAvatar = async (req, reply) => {
 
         if (!user)
             return reply.status(404).send({ error: 'User not found.' });
+
+        if (
+            user.avatarUrl?.startsWith('/avatars/') &&
+            (!avatarUrl || avatarUrl.startsWith('http'))
+        ) {
+            const oldFile = path.join('/app/public', user.avatarUrl);
+            try {
+                await fs.unlink(oldFile);
+            } catch (e) {
+                console.warn(`Old avatar not found or already deleted: ${oldFile}`);
+            }
+        }
 
         const newAvatar =
             avatarUrl && avatarUrl.trim() !== ''
