@@ -13,6 +13,7 @@ services:
     container_name: backend
     volumes:
       - db:/app/src/prisma
+      - avatars:/app/public/avatars
     restart: always
     env_file:
       - ./backend/.env
@@ -54,3 +55,4 @@ networks:
 
 volumes:
   db:
+  avatars:
