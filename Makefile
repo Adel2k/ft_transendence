@@ -42,7 +42,7 @@ front:
 	@docker-compose -f docker-compose.yml up -d --build --no-deps frontend
 nginx:
 	@echo "${GREEN}${BOLD}Starting nginx container..${RESET}"
-	@docker-compose -f docker-compose.yml up -d --build nginx
+	@docker-compose -f docker-compose.yml up -d --build --no-deps nginx
 
 backend:
 	@echo "${GREEN}${BOLD}Starting backend container..${RESET}"
