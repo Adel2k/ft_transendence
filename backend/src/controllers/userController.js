@@ -87,9 +87,9 @@ const updateAvatar = async (req, reply) => {
         }
 
         const newAvatar =
-            avatarUrl && avatarUrl.trim() !== ''
-                ? avatarUrl
-                : `${AVATAR_BASE}${encodeURIComponent(user.username)}`;
+        avatarUrl && avatarUrl.trim() !== ''
+          ? avatarUrl
+          : `${AVATAR_BASE}${encodeURIComponent(user.username)}?bgset=bg1`;
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },

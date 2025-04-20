@@ -40,7 +40,7 @@ const register = async (req, reply) => {
                 email,
                 username,
                 password: hashedPassword,
-                avatarUrl: avatarUrl || `${AVATAR_BASE}${encodeURIComponent(username)}`,
+                avatarUrl: avatarUrl || `${AVATAR_BASE}${encodeURIComponent(username)}?bgset=bg1`,
             },
         });
 
