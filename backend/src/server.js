@@ -5,6 +5,7 @@ import 'dotenv/config';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { fileURLToPath } from 'url';
+import websocket from '@fastify/websocket';
 
 import jwtPlugin from './plugins/jwt.js';
 import registerRoutes from './routes/index.js';
@@ -19,6 +20,7 @@ const fastify = Fastify({
 });
 
 fastify.register(formbody);
+fastify.register(websocket);
 fastify.register(multipart);
 fastify.register(jwtPlugin);
 fastify.register(registerRoutes);

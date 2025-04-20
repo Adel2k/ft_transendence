@@ -2,6 +2,7 @@ import prisma from '../db/prisma.js';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
+import socketController from './socketController.js';
 
 const AVATAR_BASE = process.env.DEFAULT_AVATAR;
 
@@ -160,7 +161,7 @@ const listFriends = async (req, reply) => {
                 id: friend.id,
                 username: friend.username,
                 avatarUrl: friend.avatarUrl,
-                isOnline: false,
+                isOnline: socketController.isUserOnline(friend.id),
             };
         });
 
