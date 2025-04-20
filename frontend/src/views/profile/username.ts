@@ -1,7 +1,7 @@
 import { createUsernameModal } from './usernameUI';
 import { showNotification } from '../../components/notification';
 
-export function createUsernameSection(username: string): HTMLElement {
+export function createUsernameSection(username: string, avatarURL: string): HTMLElement {
   const container = document.createElement('div');
   container.className = 'flex flex-col items-center gap-4';
 
@@ -32,13 +32,14 @@ export function createUsernameSection(username: string): HTMLElement {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to update username');
     }
-
-    const avatarResponse = await fetch('/api/user/avatar', {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({}),
-    });
-    if (!avatarResponse.ok) throw new Error('Failed to update avatar');
+    if (!avatarURL.startsWith('/avatars/')) {
+      const avatarResponse = await fetch('/api/user/avatar', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({}),
+      });
+      if (!avatarResponse.ok) throw new Error('Failed to update avatar');
+    }
 
     usernameDisplay.textContent = `Username: ${newUsername}`;
     showNotification('Username updated successfully!', 'success');

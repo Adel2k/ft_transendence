@@ -1,4 +1,5 @@
 import { getCookie } from './utils/cookies';
+import { connectToWebSocket, getWebSocket } from './utils/socket';
 
 export async function router() {
   const app = document.getElementById('app');
@@ -12,6 +13,10 @@ export async function router() {
     authenticated = !token;
   } else {
     authenticated = !!token;
+  }
+
+  if (authenticated && !getWebSocket() && token) {
+    connectToWebSocket(token);
   }
 
   if (authenticated && (path === '/' || path === '/register')) {
@@ -39,13 +44,13 @@ export async function router() {
     case '/profile':
       import('./views/profile/index').then((m) => m.render(app!));
       break;
-      case '/game':
-        import('./views/game/index').then((m) => m.render(app!));
-        break;
-      case '/settings':
-        import('./views/settings/index').then((m) => m.render(app!));
-        break;
-      case '/404':
+    case '/game':
+      import('./views/game/index').then((m) => m.render(app!));
+      break;
+    case '/settings':
+      import('./views/settings/index').then((m) => m.render(app!));
+      break;
+    case '/404':
       import('./views/error/404').then((m) => m.render(app!));
       break;
     default:

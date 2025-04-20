@@ -2,6 +2,7 @@ import { getCookie, setCookie } from '../../utils/cookies';
 import { createLoginUI } from './loginUI';
 import { setupLoginForm } from './loginForm';
 import { showNotification } from '../../components/notification';
+import { connectToWebSocket } from '../../utils/socket';
 
 export async function render(root: HTMLElement) {
   if (!root) {
@@ -85,6 +86,7 @@ export async function render(root: HTMLElement) {
       setCookie('2faCode', 'true');
       showNotification('2FA verified successfully!', 'success');
       modal.classList.add('hidden');
+      connectToWebSocket(token);
       history.pushState(null, '', '/home');
       import('../home/index').then((m) => m.render(root));
     } catch (error) {

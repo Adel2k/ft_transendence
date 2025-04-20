@@ -100,7 +100,7 @@ export function createTwoFASection(is2FAEnabled: boolean): HTMLElement {
           throw new Error('Failed to generate 2FA setup');
         }
 
-        const { qr, base32 } = await response.json();
+        const { qr } = await response.json();
 
         modalTitle.textContent = 'Enable 2FA';
         qrImage.src = qr;

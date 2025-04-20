@@ -18,14 +18,12 @@ export async function login(email: string, password: string): Promise<boolean> {
     setCookie('token', token);
     setCookie('2fa', 'false');
     setCookie('2faCode', 'true');
-    console.log('Login successful, token:', token);
     return false;
   } else if (responseText.includes('tempToken')) {
     const { tempToken } = JSON.parse(responseText);
     setCookie('token', tempToken);
     setCookie('2fa', 'true');
     setCookie('2faCode', 'false');
-    console.log('Login successful, token:', tempToken);
     return true;
   }
 

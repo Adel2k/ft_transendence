@@ -29,7 +29,7 @@ export async function render(root: HTMLElement) {
     const { user, friends, history } = await fetchUserData(token);
     
     const avatarSection = createAvatarSection(user.avatarUrl);
-    const usernameSection = createUsernameSection(user.username);
+    const usernameSection = createUsernameSection(user.username, user.avatarUrl);
     const statsSection = createStatsSection(user.wins, user.losses);
     const twoFASection = createTwoFASection(getCookie('2fa') === 'true');
     

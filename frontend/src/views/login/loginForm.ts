@@ -1,6 +1,8 @@
 import { login } from './loginService';
 import { validateLoginForm } from './loginValidation';
 import { showNotification } from '../../components/notification';
+import { getCookie } from '../../utils/cookies';
+import { connectToWebSocket } from '../../utils/socket';
 
 export function setupLoginForm(root: HTMLElement) {
   const form = root.querySelector('#login-form') as HTMLFormElement;
@@ -33,6 +35,10 @@ export function setupLoginForm(root: HTMLElement) {
         showNotification('2FA is enabled. Please enter your 2FA code.', 'info');
       } else {
         showNotification('Login successful!', 'success');
+        const token = getCookie('token');
+        if (token) {
+          connectToWebSocket(token);
+        }
         history.pushState(null, '', '/home');
         import('../../router').then((m) => m.router());
       }

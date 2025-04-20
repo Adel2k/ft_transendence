@@ -6,6 +6,7 @@ export async function register(email: string, username: string, password: string
   });
 
   if (!response.ok) {
-    throw new Error('Registration failed');
+    const error = await response.json();
+    throw new Error(error.error);
   }
 }
