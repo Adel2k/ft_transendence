@@ -3,8 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import socketController from './socketController.js';
-
-const AVATAR_BASE = process.env.DEFAULT_AVATAR;
+import { generateRandomAvatar } from '../utils/avatar.js';
 
 const me = async (req, reply) => {
     const user = await prisma.user.findUnique({
@@ -89,7 +88,7 @@ const updateAvatar = async (req, reply) => {
         const newAvatar =
         avatarUrl && avatarUrl.trim() !== ''
           ? avatarUrl
-          : `${AVATAR_BASE}${encodeURIComponent(user.username)}?bgset=bg1`;
+          : generateRandomAvatar(user.username);
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },

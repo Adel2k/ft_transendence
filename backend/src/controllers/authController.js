@@ -3,9 +3,9 @@ import prisma from '../db/prisma.js';
 import {app} from '../server.js';
 import speakeasy from 'speakeasy';
 import { validateEmail, validatePassword } from '../utils/validators.js';
+import { generateRandomAvatar } from '../utils/avatar.js';
 
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS);
-const AVATAR_BASE = process.env.DEFAULT_AVATAR;
 
 const register = async (req, reply) => {
     const { email, username, password, avatarUrl } = req.body;
@@ -40,7 +40,7 @@ const register = async (req, reply) => {
                 email,
                 username,
                 password: hashedPassword,
-                avatarUrl: avatarUrl || `${AVATAR_BASE}${encodeURIComponent(username)}?bgset=bg1`,
+                avatarUrl: avatarUrl || generateRandomAvatar(username),
             },
         });
 
