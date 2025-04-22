@@ -28,6 +28,23 @@ all: build
 
 re: clean all
 
+up:
+	@echo "${YELLOW}${BOLD}Starting up containers...${RESET}"
+	@docker-compose up
+	@echo "${GREEN}✅ Done...${RESET}"
+
+ps:
+	@echo "${YELLOW}${BOLD}Listing containers...${RESET}"
+	@docker ps
+	@echo "${GREEN}✅ Done...${RESET}"
+
+down:
+	@echo "${YELLOW}${BOLD}Shutting down containers...${RESET}"
+	@docker-compose down
+	@echo "${GREEN}✅ Done...${RESET}"
+
+# =========================== Building ==========================
+
 build:
 	@echo "${GREEN}${BOLD}Building up containers...${RESET}"
 	@docker-compose up -d --build 
@@ -43,20 +60,45 @@ front:
 nginx:
 	@echo "${GREEN}${BOLD}Starting nginx container..${RESET}"
 	@docker-compose -f docker-compose.yml up -d --build --no-deps nginx
-
 backend:
 	@echo "${GREEN}${BOLD}Starting backend container..${RESET}"
 	@docker-compose -f docker-compose.yml up -d --build backend
 
-up:
-	@echo "${YELLOW}${BOLD}Starting up containers...${RESET}"
-	@docker-compose up
+# =========================== Logs ==========================
+
+logs:
+	@echo "${YELLOW}${BOLD}Showing logs...${RESET}"
+	@docker-compose logs -f
+	@echo "${GREEN}✅ Done...${RESET}"
+logs-backend:
+	@echo "${YELLOW}${BOLD}Showing backend logs...${RESET}"
+	@docker-compose logs -f backend
+	@echo "${GREEN}✅ Done...${RESET}"
+logs-frontend:
+	@echo "${YELLOW}${BOLD}Showing frontend logs...${RESET}"
+	@docker-compose logs -f frontend
+	@echo "${GREEN}✅ Done...${RESET}"
+logs-nginx:
+	@echo "${YELLOW}${BOLD}Showing nginx logs...${RESET}"
+	@docker-compose logs -f nginx
 	@echo "${GREEN}✅ Done...${RESET}"
 
-down:
-	@echo "${YELLOW}${BOLD}Shutting down containers...${RESET}"
-	@docker-compose down
+# =========================== exec ==========================
+
+exec-back:
+	@echo "${YELLOW}${BOLD}Executing command in backend container...${RESET}"
+	@docker exec -it backend sh 
 	@echo "${GREEN}✅ Done...${RESET}"
+exec-front:	
+	@echo "${YELLOW}${BOLD}Executing command in frontend container...${RESET}"
+	@docker exec -it frontend sh 
+	@echo "${GREEN}✅ Done...${RESET}"
+exec-nginx:	
+	@echo "${YELLOW}${BOLD}Executing command in nginx container...${RESET}"
+	@docker exec -it nginx sh 
+	@echo "${GREEN}✅ Done...${RESET}"
+
+# =========================== deleting ==========================
 
 clean: down
 	@echo "${RED}${BOLD}Cleaning up containers, images and networks...${RESET}"
