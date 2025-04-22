@@ -20,34 +20,43 @@ services:
     networks:
         - app-network
 
-
   nginx:
-
     build: 
       context: .
       dockerfile: nginx/Dockerfile
-
     container_name: nginx
-    
     ports:
       - 443:443
       - 80:80
-
-
     depends_on:
       - frontend
       - backend
-
     volumes:
         - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
         - ./nginx/certs:/etc/nginx/certs
-
     env_file:
       - .env
     networks:
       - app-network
 
-
+  # vault:
+  #   build:
+  #     context: ./Vault
+  #     dockerfile: Dockerfile
+  #   container_name: vault
+  #   restart: on-failure:10
+  #   ports:
+  #     - "8200:8200"
+  #   environment:
+  #     VAULT_ADDR: 'https://0.0.0.0:8200'
+  #   cap_add:
+  #     - IPC_LOCK
+  #   volumes:
+  #     - vault-volume:/data
+  #   healthcheck:
+  #     retries: 5
+  #   networks:
+  #     - app-network
 
 networks:
   app-network:
@@ -56,3 +65,4 @@ networks:
 volumes:
   db:
   avatars:
+  # vault-volume:
