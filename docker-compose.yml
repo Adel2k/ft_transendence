@@ -39,24 +39,24 @@ services:
     networks:
       - app-network
 
-  # vault:
-  #   build:
-  #     context: ./Vault
-  #     dockerfile: Dockerfile
-  #   container_name: vault
-  #   restart: on-failure:10
-  #   ports:
-  #     - "8200:8200"
-  #   environment:
-  #     VAULT_ADDR: 'https://0.0.0.0:8200'
-  #   cap_add:
-  #     - IPC_LOCK
-  #   volumes:
-  #     - vault-volume:/data
-  #   healthcheck:
-  #     retries: 5
-  #   networks:
-  #     - app-network
+  vault:
+    build:
+      context: ./Vault
+      dockerfile: Dockerfile
+    container_name: vault
+    restart: on-failure:10
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_ADDR: 'https://0.0.0.0:8200'
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vault-volume:/data
+    healthcheck:
+      retries: 5
+    networks:
+      - app-network
 
 networks:
   app-network:
@@ -65,4 +65,4 @@ networks:
 volumes:
   db:
   avatars:
-  # vault-volume:
+  vault-volume:
