@@ -34,6 +34,8 @@ model User {
   matchesAsPlayer1 Match[] @relation("Player1")
   matchesAsPlayer2 Match[] @relation("Player2")
   matchesWon       Match[] @relation("MatchWinner")
+
+  tournaments      TournamentParticipant[]
 }
 
 model Friendship {
@@ -61,3 +63,46 @@ model Match {
   playedAt   DateTime @default(now())
 }
 
+model Tournament {
+  id            Int                     @id @default(autoincrement())
+  name          String
+  createdAt     DateTime                @default(now())
+  currentRound  Int                     @default(1)
+
+  participants  TournamentParticipant[]
+  matches       TournamentMatch[]
+}
+
+model TournamentParticipant {
+  id           Int                     @id @default(autoincrement())
+  userId       Int
+  tournamentId Int
+  alias        String
+  joinedAt     DateTime                @default(now())
+
+  user         User                    @relation(fields: [userId], references: [id])
+  tournament   Tournament              @relation(fields: [tournamentId], references: [id])
+
+  matchesAsPlayer1 TournamentMatch[]   @relation("TournamentPlayer1")
+  matchesAsPlayer2 TournamentMatch[]   @relation("TournamentPlayer2")
+  matchesWon       TournamentMatch[]   @relation("TournamentWinner")
+}
+
+model TournamentMatch {
+  id           Int                     @id @default(autoincrement())
+  tournamentId Int
+  round        Int
+  matchOrder   Int
+
+  player1Id    Int
+  player2Id    Int
+  winnerId     Int?
+
+  playedAt     DateTime?
+
+  tournament   Tournament              @relation(fields: [tournamentId], references: [id])
+
+  player1      TournamentParticipant   @relation("TournamentPlayer1", fields: [player1Id], references: [id])
+  player2      TournamentParticipant   @relation("TournamentPlayer2", fields: [player2Id], references: [id])
+  winner       TournamentParticipant?  @relation("TournamentWinner", fields: [winnerId], references: [id])
+}
