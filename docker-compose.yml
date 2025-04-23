@@ -41,8 +41,7 @@ services:
 
   vault:
     build:
-      context: ./Vault
-      dockerfile: Dockerfile
+      context: ./Vault/
     container_name: vault
     restart: on-failure:10
     ports:
@@ -55,8 +54,10 @@ services:
       - vault-volume:/data
     healthcheck:
       retries: 5
+    command: server -config=/vault/config/vault-test.hcl
     networks:
       - app-network
+    
 
 networks:
   app-network:

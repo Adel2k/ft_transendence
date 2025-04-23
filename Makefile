@@ -57,6 +57,9 @@ build:
 front:
 	@echo "${GREEN}${BOLD}Starting front container..${RESET}"
 	@docker-compose -f docker-compose.yml up -d --build --no-deps frontend
+vault:
+	@echo "${GREEN}${BOLD}Starting vault container..${RESET}"
+	@docker-compose -f docker-compose.yml up -d --build --no-deps vault
 nginx:
 	@echo "${GREEN}${BOLD}Starting nginx container..${RESET}"
 	@docker-compose -f docker-compose.yml up -d --build --no-deps nginx
@@ -97,7 +100,10 @@ exec-nginx:
 	@echo "${YELLOW}${BOLD}Executing command in nginx container...${RESET}"
 	@docker exec -it nginx sh 
 	@echo "${GREEN}✅ Done...${RESET}"
-
+exec-vault:	
+	@echo "${YELLOW}${BOLD}Executing command in vault container...${RESET}"
+	@docker exec -it vault sh 
+	@echo "${GREEN}✅ Done...${RESET}"
 # =========================== deleting ==========================
 
 clean: down

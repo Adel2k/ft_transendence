@@ -1,14 +1,21 @@
-FROM hashicorp/vault:1.9.0
+FROM hashicorp/vault:latest
+
+USER root
 
 RUN apk add --no-cache bash curl
 
-# Copy Vault configuration and scripts into the container
-COPY vault-test.hcl /Vault/vault-test.hcl
-COPY workflow-vault.sh /Vault/workflow-vault.sh
+# Create directories
+RUN mkdir -p /vault/config /vault/scripts
 
-# Set execute permission on the script
-RUN chmod +x /Vault/workflow-vault.sh
+# Copy config and script files
+COPY vault-test.hcl /vault/config/vault-test.hcl
+COPY workflow-vault.sh /vault/scripts/workflow-vault.sh
 
-# Start Vault and run the script
+# Make the script executable
+RUN chmod +x /vault/scripts/workflow-vault.sh
+
+# Set working directory to scripts folder
+WORKDIR /vault/scripts
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["/Vault/workflow-vault.sh"]
+CMD ["./workflow-vault.sh"]
