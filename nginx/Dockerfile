@@ -37,6 +37,10 @@ RUN mkdir -p /etc/nginx/modsec/rules && \
     cp /opt/owasp-crs/rules/*.data /etc/nginx/modsec/rules/ && \
     cp /opt/owasp-crs/rules/*.conf /etc/nginx/modsec/rules/
 
+RUN awk 'BEGIN{RS=""; FS="\n"} {if($0 ~ /id:949110/) gsub("deny,",""); print $0 "\n"}' /etc/nginx/modsec/rules/REQUEST-949-BLOCKING-EVALUATION.conf > /tmp/out && \
+    mv /tmp/out /etc/nginx/modsec/rules/REQUEST-949-BLOCKING-EVALUATION.conf
+
+
 RUN touch /var/log/nginx/modsec_audit.log && \
     chmod 640 /var/log/nginx/modsec_audit.log && \
     chown www-data:www-data /var/log/nginx/modsec_audit.log
