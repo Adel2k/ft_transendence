@@ -4,7 +4,10 @@ import socketController from './socketController.js';
 const createTournament = async (req, reply) => {
     const { name } = req.body;
     const tournament = await prisma.tournament.create({
-        data: { name },
+        data: {
+            name,
+            currentRound: 0,
+        },
     });
     reply.send(tournament);
 };
@@ -17,7 +20,7 @@ const joinTournament = async (req, reply) => {
     const tournament = await prisma.tournament.findUnique({
         where: { id: parseInt(id) }
     });
-    if (tournament.currentRound > 0) {
+    if (tournament.currentRound !== null && tournament.currentRound > 0) {
         return reply.status(400).send({ error: 'Tournament already started' });
     }
 

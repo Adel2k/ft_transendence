@@ -30,8 +30,6 @@ fastify.register(fastifyStatic, {
     prefix: '/',
   });
 
-console.log('STATIC ROOT =', path.join(fileURLToPath(import.meta.url), '../public'));
-
 fastify.listen({
     port: 3000,
     host: '0.0.0.0'

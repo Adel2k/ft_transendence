@@ -1,3 +1,4 @@
+import prisma from '../db/prisma.js';
 const onlineUsers = new Map();
 const matchSockets = new Map();
 
@@ -12,11 +13,9 @@ const handleConnection = (fastify) => {
             const decoded = await fastify.jwt.verify(token);
             const userId = decoded.id;
             onlineUsers.set(userId, conn);
-            console.log(`🟢 User ${userId} connected`);
 
             conn.on('close', () => {
                 onlineUsers.delete(userId);
-                console.log(`🔴 User ${userId} disconnected`);
             });
         } catch (err) {
             console.warn('❌ Invalid WS token:', err.message);
@@ -27,11 +26,16 @@ const handleConnection = (fastify) => {
 
 const handleMatchSocket = (fastify) => {
     return async function (conn, req) {
+
         const matchId = parseInt(req.params.matchId);
+
         let token = req.headers['sec-websocket-protocol'];
         if (Array.isArray(token)) token = token[0];
 
-        if (!token) return conn?.close();
+        if (!token) {
+            console.warn('❌ No WS token received');
+            return conn?.close();
+        }
 
         let decoded;
         try {
@@ -42,48 +46,78 @@ const handleMatchSocket = (fastify) => {
         }
 
         const userId = decoded.id;
-        const match = await fastify.prisma.tournamentMatch.findUnique({
+
+        const match = await prisma.tournamentMatch.findUnique({
             where: { id: matchId },
+            include: {
+                player1: { select: { userId: true } },
+                player2: { select: { userId: true } },
+            },
         });
 
-        if (!match || ![match.player1Id, match.player2Id].includes(userId)) {
-            console.warn('Unauthorized match access');
+        if (!match) {
+            console.warn('❌ Match not found');
             return conn?.close();
         }
 
-        const playerNumber = match.player1Id === userId ? 1 : 2;
 
-        console.log(`🎮 User ${userId} joined match ${matchId} as Player ${playerNumber}`);
-        conn.socket.send(JSON.stringify({ type: 'joined', player: playerNumber }));
+        const participant = await prisma.tournamentParticipant.findFirst({
+            where: {
+                tournamentId: match.tournamentId,
+                userId: userId,
+            },
+        });
+
+        if (!participant) {
+            console.warn('❌ User is not a tournament participant');
+            return conn?.close();
+        }
+
+
+        if (![match.player1.userId, match.player2.userId].includes(userId)) {
+            console.warn('❌ User not assigned to this match');
+            return conn?.close();
+        }
+
+        const playerNumber = match.player1.userId === userId ? 1 : 2;
+
+        conn.send(JSON.stringify({ type: 'joined', player: playerNumber }));
 
         if (!matchSockets.has(matchId)) {
             matchSockets.set(matchId, []);
         }
 
-        matchSockets.get(matchId).push(conn.socket);
+        matchSockets.get(matchId).push(conn);
 
-        conn.socket.on('message', (raw) => {
+        conn.on('message', (raw) => {
             try {
                 const msg = JSON.parse(raw.toString());
 
-                matchSockets.get(matchId).forEach((client) => {
-                    if (client !== conn.socket && client.readyState === 1) {
-                        client.send(JSON.stringify({ ...msg, from: playerNumber }));
-                    }
-                });
+                if (msg.type === 'move') {
+                    matchSockets.get(matchId)?.forEach((client) => {
+                        if (client !== conn && client.readyState === 1) {
+                            client.send(JSON.stringify({
+                                type: 'opponent_move',
+                                direction: msg.direction,
+                                from: playerNumber,
+                            }));
+                        }
+                    });
+                } else {
+                    console.warn('⚠️ Unknown message type:', msg.type);
+                }
             } catch (e) {
-                console.warn('❌ Invalid message format', e.message);
+                console.warn('❌ Invalid message format:', e.message);
             }
         });
 
-        conn.socket.on('close', () => {
-            const sockets = matchSockets.get(matchId)?.filter((s) => s !== conn.socket);
+        conn.on('close', () => {
+            const sockets = matchSockets.get(matchId)?.filter((s) => s !== conn);
             if (sockets?.length === 0) {
                 matchSockets.delete(matchId);
             } else {
                 matchSockets.set(matchId, sockets);
             }
-            console.log(`🔴 Player ${playerNumber} left match ${matchId}`);
         });
     };
 };
