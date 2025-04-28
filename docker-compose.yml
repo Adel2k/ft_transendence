@@ -40,24 +40,13 @@ services:
       - app-network
 
   vault:
-    build:
-      context: ./Vault/
+    image: hashicorp/vault:latest
     container_name: vault
-    restart: on-failure:10
-    ports:
-      - "8200:8200"
-    environment:
-      VAULT_ADDR: 'https://0.0.0.0:8200'
+    volumes:
+      - ./Vault/vault.hcl:/vault/config/vault.hcl
     cap_add:
       - IPC_LOCK
-    volumes:
-      - vault-volume:/data
-    healthcheck:
-      retries: 5
-    command: server -config=/vault/config/vault-test.hcl
-    networks:
-      - app-network
-    
+
 
 networks:
   app-network:
