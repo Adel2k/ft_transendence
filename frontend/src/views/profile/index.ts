@@ -1,12 +1,11 @@
-import { createNavbar } from '../../components/navbars';
-import { createAvatarSection } from './avatar';
-import { createUsernameSection } from './username';
-import { createStatsSection } from './stats';
-import { createTwoFASection } from './twofa';
-import { createFriendsSection } from './friends';
-import { createHistorySection } from './history';
 import { fetchUserData } from './dataFetch';
-import { getCookie } from '../../utils/cookies';
+import { createNavbar } from '../../components/navbars';
+import { createStatsSection } from './stats/statsSection';
+import { createTwoFASection } from './twofa/twofaSection';
+import { createAvatarSection } from './avatar/avatarSection';
+import { createFriendsSection } from './friends/friendsSection';
+import { createHistorySection } from './history/historySection';
+import { createUsernameSection } from './username/usernameSection';
 
 export async function render(root: HTMLElement) {
   if (!root) {
@@ -31,7 +30,7 @@ export async function render(root: HTMLElement) {
     const avatarSection = createAvatarSection(user.avatarUrl);
     const usernameSection = createUsernameSection(user.username, user.avatarUrl);
     const statsSection = createStatsSection(user.wins, user.losses);
-    const twoFASection = createTwoFASection(getCookie('2fa') === 'true');
+    const twoFASection = createTwoFASection(user.is2FAEnabled);
     
     const friendsSection = createFriendsSection(friends);
 

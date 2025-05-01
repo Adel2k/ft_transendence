@@ -1,8 +1,8 @@
-import { showNotification } from '../../components/notification';
+import { showNotification } from '../../../components/notification';
 
 export function createUsernameModal(
   currentUsername: string,
-  onSave: (newUsername: string) => void
+  onSave: (newUsername: string) => Promise<void>
 ): HTMLElement {
   const modal = document.createElement('div');
   modal.className =
