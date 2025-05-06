@@ -1,20 +1,22 @@
 import { getCookie } from './utils/cookies';
 import { connectToWebSocket, getWebSocket } from './utils/socket';
 
+export function checkTwoFA(token: string | null): boolean {
+  if (getCookie('2fa') === 'true' && getCookie('2faCode') === 'false') {
+    return !token;
+  } else {
+    return !!token;
+  }
+}
+
 export async function router() {
   const app = document.getElementById('app');
   const path = window.location.pathname;
 
   const token = getCookie('token');
   let authenticated: boolean;
-  if (getCookie('2fa') === 'true' && getCookie('2faCode') === 'true') {
-    authenticated = !!token;
-  } else if (getCookie('2fa') === 'true' && getCookie('2faCode') === 'false') {
-    authenticated = !token;
-  } else {
-    authenticated = !!token;
-  }
 
+  authenticated = checkTwoFA(token);
   if (authenticated && !getWebSocket() && token) {
     connectToWebSocket(token);
   }
@@ -26,8 +28,8 @@ export async function router() {
   }
 
   if (!authenticated && path !== '/' && path !== '/register') {
-    history.pushState(null, '', '/404');
-    import('./views/error/404').then((m) => m.render(app!));
+    history.pushState(null, '', '/');
+    import('./views/login/index').then((m) => m.render(app!));
     return;
   }
 
