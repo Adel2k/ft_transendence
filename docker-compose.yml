@@ -38,12 +38,18 @@ services:
       - .env
     networks:
       - app-network
-
   vault:
-    image: hashicorp/vault:latest
+    build: ./vault/
+    image: vault
     container_name: vault
+    ports:
+      - "8200:8200"
+      - "8300:8300"
+    restart: unless-stopped  
+    environment:
+      VAULT_ADDR: "http://localhost:8300"
     volumes:
-      - ./Vault/vault.hcl:/vault/config/vault.hcl
+      - ./vault/vault-data:/vault/file
     cap_add:
       - IPC_LOCK
 

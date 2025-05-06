@@ -85,7 +85,10 @@ logs-nginx:
 	@echo "${YELLOW}${BOLD}Showing nginx logs...${RESET}"
 	@docker-compose logs -f nginx
 	@echo "${GREEN}✅ Done...${RESET}"
-
+logs-vault:
+	@echo "${YELLOW}${BOLD}Showing vault: logs...${RESET}"
+	@docker-compose logs -f vault
+	@echo "${GREEN}✅ Done...${RESET}"
 # =========================== exec ==========================
 
 exec-back:
@@ -112,10 +115,11 @@ clean: down
 	@docker system prune --force --all
 	@echo "${GREEN}✅ Done...${RESET}"
 
-fclean: down
+fclean: down	
 	@echo "${RED}${BOLD}Cleaning up containers, volumes, images and networks...${RESET}"
 	@docker-compose down --rmi all
 	@docker system prune --volumes --force --all
 	@echo "${GREEN}✅ Done...${RESET}"
+
 
 .PHONY: all re up down front backend nginx build clean fclean
