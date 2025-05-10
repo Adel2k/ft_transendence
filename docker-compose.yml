@@ -1,44 +1,4 @@
 services:
-  frontend:
-    build: ./frontend/
-    container_name: frontend
-    restart: always
-    depends_on: 
-      - backend
-    networks:
-        - app-network
-
-  backend:
-    build: ./backend/
-    container_name: backend
-    volumes:
-      - db:/app/src/prisma
-      - avatars:/app/public/avatars
-    restart: always
-    env_file:
-      - ./backend/.env
-    networks:
-        - app-network
-
-  nginx:
-    build: 
-      context: .
-      dockerfile: nginx/Dockerfile
-    container_name: nginx
-    ports:
-      - 8443:443
-      - 8080:80
-    depends_on:
-      - frontend
-      - backend
-    volumes:
-        - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-        - ./nginx/certs:/etc/nginx/certs
-    env_file:
-      - .env
-    networks:
-      - app-network
-
   vault:
     build: ./vault/
     image: vault
@@ -53,6 +13,53 @@ services:
       - ./vault/vault-data:/vault/file
     cap_add:
       - IPC_LOCK
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend/
+    container_name: frontend
+    restart: always
+    depends_on: 
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend/
+    container_name: backend
+    volumes:
+      - db:/app/src/prisma
+      - avatars:/app/public/avatars
+    restart: always
+    environment:
+      - DATABASE_URL
+      - JWT_SECRET
+      - DEFAULT_AVATAR
+      - HTTPS_CERT
+      - HTTPS_KEY
+      - JWT_EXPIRES_IN
+    depends_on:
+      - vault
+    networks:
+      - app-network
+
+  nginx:
+    build: 
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: nginx
+    ports:
+      - 443:443
+      - 80:80
+    depends_on:
+      - frontend
+      - backend
+    volumes:
+        - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        - ./nginx/certs:/etc/nginx/certs
+    env_file:
+      - .env
     networks:
       - app-network
 

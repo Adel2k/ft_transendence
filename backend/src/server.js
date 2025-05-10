@@ -10,6 +10,8 @@ import websocket from '@fastify/websocket';
 import jwtPlugin from './plugins/jwt.js';
 import registerRoutes from './routes/index.js';
 import formbody from '@fastify/formbody';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const fastify = Fastify({
     logger: true,

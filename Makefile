@@ -24,9 +24,13 @@ BG_MAGENTA		= \e[45m
 BG_CYAN			= \e[46m
 BG_WHITE		= \e[47m
 
-all: build
+all: fast
 
-re: clean all
+fast:
+	@docker-compose down
+	@docker-compose up --build
+
+re: clean build
 
 up:
 	@echo "${YELLOW}${BOLD}Starting up containers...${RESET}"
