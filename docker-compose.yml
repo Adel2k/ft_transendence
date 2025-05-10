@@ -26,8 +26,8 @@ services:
       dockerfile: nginx/Dockerfile
     container_name: nginx
     ports:
-      - 443:443
-      - 80:80
+      - 8443:443
+      - 8080:80
     depends_on:
       - frontend
       - backend
@@ -38,6 +38,7 @@ services:
       - .env
     networks:
       - app-network
+
   vault:
     build: ./vault/
     image: vault
@@ -52,6 +53,8 @@ services:
       - ./vault/vault-data:/vault/file
     cap_add:
       - IPC_LOCK
+    networks:
+      - app-network
 
 
 networks:
