@@ -1,8 +1,8 @@
 services:
   vault:
     build: ./vault/
-    image: vault
-    container_name: vault
+    image: vault2
+    container_name: vault2
     ports:
       - "8200:8200"
       - "8300:8300"
