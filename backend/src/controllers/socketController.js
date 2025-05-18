@@ -15,6 +15,17 @@ const handleConnection = (fastify) => {
             const userId = decoded.id;
             onlineUsers.set(userId, conn);
 
+            conn.on('message', (raw) => {
+                try {
+                    const msg = JSON.parse(raw.toString());
+                    if (msg.type === 'ping') {
+                        conn.send(JSON.stringify({ type: 'pong' }));
+                    }
+                } catch (e) {
+                    console.warn('❌ Invalid message format:', e.message);
+                }
+            });
+
             conn.on('close', () => {
                 onlineUsers.delete(userId);
             });
@@ -62,13 +73,6 @@ const handleMatchSocket = (fastify) => {
 
         if (!participant) return conn?.close();
 
-        if (![match.player1.userId, match.player2.userId].includes(userId)) {
-            return conn?.close();
-        }
-
-        const playerNumber = match.player1.userId === userId ? 1 : 2;
-        conn.send(JSON.stringify({ type: 'joined', player: playerNumber }));
-
         if (!matchSockets.has(matchId)) {
             matchSockets.set(matchId, []);
         }
@@ -77,13 +81,20 @@ const handleMatchSocket = (fastify) => {
         conn.on('message', (raw) => {
             try {
                 const msg = JSON.parse(raw.toString());
-                if (msg.type === 'move') {
+                if (msg.type === 'ping') {
+                    conn.send(JSON.stringify({ type: 'pong' }));
+                    return;
+                }
+                if (msg.type === 'paddle_move') {
+                    if (![match.player1.userId, match.player2.userId].includes(userId)) {
+                       return ;
+                    }
                     matchSockets.get(matchId)?.forEach((client) => {
                         if (client !== conn && client.readyState === 1) {
                             client.send(JSON.stringify({
-                                type: 'opponent_move',
-                                direction: msg.direction,
-                                from: playerNumber,
+                                type: 'paddle_move',
+                                role: msg.role,
+                                z: msg.z
                             }));
                         }
                     });

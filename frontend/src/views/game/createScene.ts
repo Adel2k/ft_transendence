@@ -16,7 +16,6 @@ export function createPongScene(canvas: HTMLCanvasElement, options?: { role: str
     const { paddle1, paddle2 } = createPaddles(scene);
     createField(scene);
 
-    // Передаем роль в gameLoop
     runGameLoop(engine, scene, paddle1, paddle2, ball, options?.role);
 
     window.addEventListener('resize', () => {

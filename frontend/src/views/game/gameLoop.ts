@@ -1,4 +1,5 @@
 import { Vector3, Engine, Scene, Mesh } from "@babylonjs/core";
+import { getWebSocket } from '../../utils/socket';
 import { setupInput } from "./inputHandler";
 
 export function runGameLoop(
@@ -7,25 +8,58 @@ export function runGameLoop(
     paddle1: Mesh,
     paddle2: Mesh,
     ball: Mesh,
-    role: string // 'player1', 'player2', 'spectator'
+    role: string
 ) {
     const input = setupInput(ball);
     const paddleSpeed = 0.1;
 
+    function sendPaddlePosition(role: string, z: number) {
+        const socket = getWebSocket();
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'paddle_move',
+                role,
+                z
+            }));
+        }
+    }
+
+    window.addEventListener('paddle_move', (e: Event) => {
+        const { role: senderRole, z } = (e as CustomEvent).detail;
+        console.log('Received paddle move:', senderRole, z);
+        if (senderRole === role) return;
+        console.log('Updating paddle position:', senderRole, z);
+        if (senderRole === 'player1') {
+            paddle1.position.z = z;
+        } else if (senderRole === 'player2') {
+            paddle2.position.z = z;
+    }
+    });
+
+
     engine.runRenderLoop(() => {
         if (role === 'player1') {
-            // Управление только левой ракеткой
-            const { w, s } = input.keysPressed;
-            if (s && paddle1.position.z > -2.2) paddle1.position.z -= paddleSpeed;
-            if (w && paddle1.position.z < 2.2) paddle1.position.z += paddleSpeed;
+            const { w, s, arrowUp, arrowDown } = input.keysPressed;
+            if ((s || arrowDown) && paddle1.position.z > -2.2) {
+                paddle1.position.z -= paddleSpeed;
+                sendPaddlePosition(role, paddle1.position.z);
+            }
+            if ((w || arrowUp) && paddle1.position.z < 2.2) {
+                paddle1.position.z += paddleSpeed;
+                sendPaddlePosition(role, paddle1.position.z);
+            } 
         }
         if (role === 'player2') {
-            // Управление только правой ракеткой
-            const { arrowUp, arrowDown } = input.keysPressed;
-            if (arrowDown && paddle2.position.z > -2.2) paddle2.position.z -= paddleSpeed;
-            if (arrowUp && paddle2.position.z < 2.2) paddle2.position.z += paddleSpeed;
+            const { w, s, arrowUp, arrowDown } = input.keysPressed;
+            if ((s || arrowDown) && paddle2.position.z > -2.2) {
+                paddle2.position.z -= paddleSpeed;
+                sendPaddlePosition(role, paddle2.position.z);
+            } 
+            if ((w || arrowUp) && paddle2.position.z < 2.2) {
+                paddle2.position.z += paddleSpeed;
+                sendPaddlePosition(role, paddle2.position.z);
+            }
         }
-        // Зрители не управляют ракетками
 
         if (input.isBallMoving()) {
             const ballDirection = input.getBallDirection();

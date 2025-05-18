@@ -1,6 +1,5 @@
 import { createNavbar } from '../../components/navbars';
 import { createFloatingShape } from '../shape/shapes';
-import { renderTournamentPage } from '../tournament/viewTournament';
 import { getCookie } from '../../utils/cookies';
 
 
