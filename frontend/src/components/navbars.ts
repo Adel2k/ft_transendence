@@ -10,7 +10,7 @@ export async function createNavbar(): Promise<HTMLElement | null> {
 
   const links = [
     { href: '/home', label: 'Home', icon: 'home' },
-    { href: '/game', label: 'Matchmaking', icon: 'game' },
+    { href: '/tournament/create', label: 'Matchmaking', icon: 'game' },
     { href: '/profile', label: 'Profile', icon: 'profile' },
     { href: '/settings', label: 'Settings', icon: 'settings' },
   ];

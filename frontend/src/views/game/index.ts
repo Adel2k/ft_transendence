@@ -1,7 +1,7 @@
 import { createPongScene } from './createScene';
 import { createNavbar } from '../../components/navbars';
 
-export async function render(root: HTMLElement) {
+export async function render(root: HTMLElement, options?: { role: string, match: any }) {
     root.innerHTML = '';
 
     const canvas = document.createElement('canvas');
@@ -9,7 +9,7 @@ export async function render(root: HTMLElement) {
     canvas.className = 'w-screen h-screen';
     root.appendChild(canvas);
 
-    createPongScene(canvas);
+    createPongScene(canvas, options);
 
     const navbar = await createNavbar();
     if (navbar) {

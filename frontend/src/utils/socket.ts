@@ -12,15 +12,23 @@ export function connectToWebSocket(token: string): void {
   };
 
   socket.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'tournament_started' && msg.redirectTo) {
+        window.location.href = msg.redirectTo;
+      }
+    } catch (e) {
+    }
   };
 
-  socket.onclose = () => {
+  socket.onclose = () => {;
     socket = null;
   };
 
   socket.onerror = (error) => {
   };
 }
+
 
 export function disconnectWebSocket(): void {
   if (socket) {

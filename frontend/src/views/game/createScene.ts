@@ -6,7 +6,7 @@ import { createBall }       from './createBall';
 import { createPaddles }    from './createPaddles';
 import { runGameLoop }      from './gameLoop';
 
-export function createPongScene(canvas: HTMLCanvasElement) {
+export function createPongScene(canvas: HTMLCanvasElement, options?: { role: string, match: any }) {
     const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
 
@@ -16,7 +16,8 @@ export function createPongScene(canvas: HTMLCanvasElement) {
     const { paddle1, paddle2 } = createPaddles(scene);
     createField(scene);
 
-    runGameLoop(engine, scene, paddle1, paddle2, ball);
+    // Передаем роль в gameLoop
+    runGameLoop(engine, scene, paddle1, paddle2, ball, options?.role);
 
     window.addEventListener('resize', () => {
         engine.resize();

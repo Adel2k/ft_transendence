@@ -1,6 +1,7 @@
 import prisma from '../db/prisma.js';
-const onlineUsers = new Map();
-const matchSockets = new Map();
+
+const onlineUsers = new Map(); // userId -> WebSocket
+const matchSockets = new Map(); // matchId -> [WebSocket]
 
 const handleConnection = (fastify) => {
     return async function (conn, req) {
@@ -26,16 +27,11 @@ const handleConnection = (fastify) => {
 
 const handleMatchSocket = (fastify) => {
     return async function (conn, req) {
-
         const matchId = parseInt(req.params.matchId);
 
         let token = req.headers['sec-websocket-protocol'];
         if (Array.isArray(token)) token = token[0];
-
-        if (!token) {
-            console.warn('❌ No WS token received');
-            return conn?.close();
-        }
+        if (!token) return conn?.close();
 
         let decoded;
         try {
@@ -55,11 +51,7 @@ const handleMatchSocket = (fastify) => {
             },
         });
 
-        if (!match) {
-            console.warn('❌ Match not found');
-            return conn?.close();
-        }
-
+        if (!match) return conn?.close();
 
         const participant = await prisma.tournamentParticipant.findFirst({
             where: {
@@ -68,31 +60,23 @@ const handleMatchSocket = (fastify) => {
             },
         });
 
-        if (!participant) {
-            console.warn('❌ User is not a tournament participant');
-            return conn?.close();
-        }
-
+        if (!participant) return conn?.close();
 
         if (![match.player1.userId, match.player2.userId].includes(userId)) {
-            console.warn('❌ User not assigned to this match');
             return conn?.close();
         }
 
         const playerNumber = match.player1.userId === userId ? 1 : 2;
-
         conn.send(JSON.stringify({ type: 'joined', player: playerNumber }));
 
         if (!matchSockets.has(matchId)) {
             matchSockets.set(matchId, []);
         }
-
         matchSockets.get(matchId).push(conn);
 
         conn.on('message', (raw) => {
             try {
                 const msg = JSON.parse(raw.toString());
-
                 if (msg.type === 'move') {
                     matchSockets.get(matchId)?.forEach((client) => {
                         if (client !== conn && client.readyState === 1) {
@@ -103,8 +87,6 @@ const handleMatchSocket = (fastify) => {
                             }));
                         }
                     });
-                } else {
-                    console.warn('⚠️ Unknown message type:', msg.type);
                 }
             } catch (e) {
                 console.warn('❌ Invalid message format:', e.message);
@@ -122,12 +104,31 @@ const handleMatchSocket = (fastify) => {
     };
 };
 
+const broadcastStartToTournament = async (tournamentId, matchInfo) => {
+    const participants = await prisma.tournamentParticipant.findMany({
+        where: { tournamentId },
+        select: { userId: true }
+    });
+
+    for (const { userId } of participants) {
+        const conn = onlineUsers.get(userId);
+        if (conn && conn.readyState === 1) {
+            conn.send(JSON.stringify({
+                type: 'tournament_started',
+                redirectTo: `/tournament/game/${tournamentId}`,
+                ...matchInfo
+            }));
+        }
+    }
+};
+
 const isUserOnline = (userId) => onlineUsers.has(userId);
 const getOnlineUsers = () => onlineUsers;
 
 export default {
     handleConnection,
     handleMatchSocket,
+    broadcastStartToTournament,
     isUserOnline,
-    getOnlineUsers,
+    getOnlineUsers
 };

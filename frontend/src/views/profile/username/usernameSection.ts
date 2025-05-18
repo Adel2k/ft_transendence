@@ -1,13 +1,17 @@
 import { createUsernameModal } from './usernameModal';
 import { onUsernameSave } from './usernameController';
 
-export function createUsernameSection(username: string, avatarURL: string): HTMLElement {
+export function createUsernameSection(username: string, avatarURL: string, id: Number): HTMLElement {
   const container = document.createElement('div');
   container.className = 'flex flex-col items-center gap-4';
 
   const usernameDisplay = document.createElement('p');
   usernameDisplay.textContent = `Username: ${username}`;
   usernameDisplay.className = 'text-lg font-bold text-white-700 ml-8';
+
+  const idDisplay = document.createElement('p');
+  idDisplay.textContent = `ID: ${id}`;
+  idDisplay.className = 'text-md text-white-500 ml-8';
 
   const editButton = document.createElement('button');
   editButton.textContent = 'Edit Username';
@@ -22,6 +26,7 @@ export function createUsernameSection(username: string, avatarURL: string): HTML
   });
 
   container.appendChild(usernameDisplay);
+  container.appendChild(idDisplay);
   container.appendChild(editButton);
 
   return container;

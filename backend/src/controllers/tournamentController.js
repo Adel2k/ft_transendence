@@ -11,35 +11,53 @@ const createTournament = async (req, reply) => {
     });
     reply.send(tournament);
 };
-
 const joinTournament = async (req, reply) => {
     const { id } = req.params;
-    const { alias } = req.body;
-    const userId = req.user.id;
+    let { userId } = req.body;
+
+    userId = Number(userId);
+    const tournamentId = Number(id);
+
+    if (isNaN(userId) || isNaN(tournamentId)) {
+        return reply.status(400).send({ error: 'Invalid userId or tournamentId' });
+    }
+
+    console.log('User ID:', userId);
 
     const tournament = await prisma.tournament.findUnique({
-        where: { id: parseInt(id) }
+        where: { id: tournamentId }
     });
-    if (tournament.currentRound !== null && tournament.currentRound > 0) {
+
+    if (tournament?.currentRound !== null && tournament.currentRound > 0) {
         return reply.status(400).send({ error: 'Tournament already started' });
     }
 
     const onlineUsers = socketController.getOnlineUsers();
+
     if (!onlineUsers.has(userId)) {
-        return reply.status(403).send({ error: 'You must be online to join the tournament' });
+        return reply.status(403).send({ error: 'User must be online to join the tournament' });
     }
 
     const existing = await prisma.tournamentParticipant.findFirst({
-        where: { userId, tournamentId: parseInt(id) },
+        where: { userId, tournamentId },
     });
 
-    if (existing)
-        return reply.status(400).send({ error: 'Already joined' });
+    if (existing) {
+        return reply.status(400).send({ error: 'User has already joined the tournament' });
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId }
+    });
+
+    if (!user) {
+        return reply.status(404).send({ error: 'User not found' });
+    }
 
     const participant = await prisma.tournamentParticipant.create({
         data: {
-            alias,
-            tournamentId: parseInt(id),
+            alias: user.username,
+            tournamentId,
             userId,
         },
     });
@@ -84,6 +102,20 @@ const startTournament = async (req, reply) => {
     await prisma.tournament.update({
         where: { id: tournamentId },
         data: { currentRound: 1 },
+    });
+
+    const firstMatch = await prisma.tournamentMatch.findFirst({
+        where: { tournamentId, round: 1 },
+        orderBy: { matchOrder: 'asc' },
+        include: {
+            player1: true,
+            player2: true,
+        },
+    });
+
+    await socketController.broadcastStartToTournament(tournamentId, {
+        player1Id: firstMatch.player1.userId,
+        player2Id: firstMatch.player2.userId,
     });
 
     reply.send({ message: 'Tournament started!' });
