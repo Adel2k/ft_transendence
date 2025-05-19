@@ -17,10 +17,11 @@ model User {
   id            Int      @id @default(autoincrement())
   email         String   @unique
   username      String   @unique
-  password      String
+  password      String?
   avatarUrl     String?
   is2faEnabled  Boolean  @default(false)
   twofaSecret   String?  // nullable
+  googleId      String?  @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

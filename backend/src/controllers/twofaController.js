@@ -5,6 +5,9 @@ import prisma from '../db/prisma.js';
 const generate2FASetup = async (req, reply) => {
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
 
+    if (user.googleId)
+        return reply.status(403).send({ error: '2FA is not allowed for Google Sign-In users.' });
+
     if (user.is2faEnabled)
         return reply.status(400).send({ error: '2FA is already enabled.' });
 
@@ -32,6 +35,9 @@ const enable2FA = async (req, reply) => {
     const { code } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
 
+    if (user.googleId)
+        return reply.status(403).send({ error: '2FA is not allowed for Google Sign-In users.' });
+
     if (user.is2faEnabled)
         return reply.status(400).send({ error: '2FA is already enabled.' });
 
@@ -57,6 +63,9 @@ const enable2FA = async (req, reply) => {
 const disable2FA = async (req, reply) => {
     const { code } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+
+    if (user.googleId)
+        return reply.status(403).send({ error: '2FA is not allowed for Google Sign-In users.' });
 
     if (!user.is2faEnabled)
         return reply.status(400).send({ error: '2FA is not enabled.' });
