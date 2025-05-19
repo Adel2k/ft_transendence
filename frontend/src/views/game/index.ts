@@ -1,7 +1,8 @@
 import { createPongScene } from './createScene';
 import { createNavbar } from '../../components/navbars';
 import { createMatchInfo } from './matchInfo';
-import { renderTournamentGamePage } from '../tournament/tournamentGame'; // добавьте импорт
+import { renderTournamentGamePage } from '../tournament/tournamentGame';
+import { getWebSocket } from '../../utils/socket';
 
 export async function render(root: HTMLElement, options?: { role: string, match: any, tournamentId?: string }) {
     root.innerHTML = '';
@@ -28,27 +29,31 @@ export async function render(root: HTMLElement, options?: { role: string, match:
         matchInfo.querySelector('#score-p2')!.textContent = scores.player2.toString();
 
         if (scores.player1 >= 5 || scores.player2 >= 5) {
+            window.dispatchEvent(new CustomEvent('stop_ball'));
             const winnerId = scores.player1 >= 5 ? options?.match.player1.userId : options?.match.player2.userId;
-            fetch(`/api/tournament/${options?.match.tournamentId}/match/${options?.match.id}/winner`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ winnerId }),
-            }).then(async res => {
-                const data = await res.json();
-                if (data.message === 'Tournament finished!' || data.message === 'No pending matches') {
-                    alert('Турнир завершён!');
-                    window.location.href = `/tournament/${options?.match.tournamentId}`;
-                } else {
-                    const nextMatchRes = await fetch(`/api/tournament/${options?.match.tournamentId}/next-match`);
-                    const nextMatch = await nextMatchRes.json();
-                    if (nextMatch && nextMatch.id) {
-                        renderTournamentGamePage(root, options?.match.tournamentId);
+            const winnerRole = scores.player1 >= 5 ? 'player1' : 'player2';
+            if (options?.role === winnerRole) {
+                fetch(`/api/tournament/${options?.match.tournamentId}/match/${options?.match.id}/winner`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ winnerId }),
+                }).then(async res => {
+                    const data = await res.json();
+                    console.log('Response data:', data);
+                    if (data.message === 'Tournament finished!') {
+                        //ВОт тут вот нужна эта логика
                     } else {
-                        alert('Турнир завершён!');
-                        window.location.href = `/tournament/${options?.match.tournamentId}`;
+                        const nextMatchRes = await fetch(`/api/tournament/${options?.match.tournamentId}/next-match`);
+                        const nextMatch = await nextMatchRes.json();
+                        if (nextMatch && nextMatch.id) {
+                            renderTournamentGamePage(root, options?.match.tournamentId);
+                        } else {
+                            alert('Турнир завершён!');
+                            window.location.href = `/tournament/${options?.match.tournamentId}`;
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     });
 }

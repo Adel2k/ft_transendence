@@ -55,6 +55,9 @@ function setupSocketHandlers() {
         window.dispatchEvent(event);
       } else if (msg.type === 'tournament_started' && msg.redirectTo) {
         window.location.href = msg.redirectTo;
+      } else if (msg.type === 'redirect') {
+        const { url } = msg;
+        window.location.href = url;
       } else if (msg.type === 'goal') {
         const event = new CustomEvent('goal', { detail: { scorer: msg.scorer } });
         window.dispatchEvent(event);

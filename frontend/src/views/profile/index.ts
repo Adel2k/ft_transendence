@@ -26,6 +26,9 @@ export async function render(root: HTMLElement) {
     }
     
     const { user, friends, history } = await fetchUserData(token);
+
+    console.log('User data:', user);
+    console.log('History data:', history);
     
     const avatarSection = createAvatarSection(user.avatarUrl);
     const usernameSection = createUsernameSection(user.username, user.avatarUrl, user.id);

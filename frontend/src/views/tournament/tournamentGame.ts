@@ -18,6 +18,9 @@ export async function renderTournamentGamePage(root: HTMLElement, tournamentId: 
 
     connectToMatchWebSocket(token, match.id);
 
+    window.addEventListener('beforeunload', () => {
+        disconnectWebSocket();
+    });
     let role: 'player1' | 'player2' | 'spectator' = 'spectator';
     if (match && match.player1 && match.player2) {
         const userId = JSON.parse(atob(token.split('.')[1])).id;

@@ -175,12 +175,10 @@ const getMatchHistory = async (req, reply) => {
     const userId = req.user.id;
 
     try {
-        const matches = await prisma.match.findMany({
+        // Regular matches
+        const regularMatches = await prisma.match.findMany({
             where: {
-                OR: [
-                    { player1Id: userId },
-                    { player2Id: userId },
-                ],
+                OR: [{ player1Id: userId }, { player2Id: userId }],
             },
             include: {
                 player1: true,
@@ -190,21 +188,56 @@ const getMatchHistory = async (req, reply) => {
             orderBy: { playedAt: 'desc' },
         });
 
-        const history = matches.map((match) => {
+        const regularHistory = regularMatches.map((match) => {
             const isWinner = match.winnerId === userId;
+            const opponent = match.player1Id === userId ? match.player2 : match.player1;
 
             return {
                 id: match.id,
-                opponent:
-                    match.player1Id === userId
-                        ? match.player2.username
-                        : match.player1.username,
+                opponent: opponent?.username || 'Unknown',
                 result: isWinner ? 'win' : 'loss',
                 playedAt: match.playedAt,
+                type: 'casual',
             };
         });
 
-        reply.send({ history });
+        // Tournament matches
+        const tournamentMatches = await prisma.tournamentMatch.findMany({
+            where: {
+                OR: [
+                    { player1: { userId } },
+                    { player2: { userId } },
+                ],
+            },
+            include: {
+                player1: { include: { user: true } },
+                player2: { include: { user: true } },
+                winner: { include: { user: true } },
+                tournament: true,
+            },
+            orderBy: { playedAt: 'desc' },
+        });
+
+        const tournamentHistory = tournamentMatches.map((match) => {
+            const isWinner = match.winner?.userId === userId;
+            const isPlayer1 = match.player1.userId === userId;
+            const opponent = isPlayer1 ? match.player2.user : match.player1.user;
+
+            return {
+                id: match.id,
+                opponent: opponent?.username || 'Unknown',
+                result: isWinner ? 'win' : 'loss',
+                playedAt: match.playedAt,
+                type: 'tournament',
+                tournamentName: match.tournament.name,
+            };
+        });
+
+        const fullHistory = [...regularHistory, ...tournamentHistory].sort(
+            (a, b) => new Date(b.playedAt) - new Date(a.playedAt)
+        );
+
+        reply.send({ history: fullHistory });
     } catch (err) {
         console.error(err);
         reply.status(500).send({ error: 'Failed to load match history.' });

@@ -160,61 +160,98 @@ const getNextMatch = async (req, reply) => {
 const submitMatchResult = async (req, reply) => {
     const { id, mid } = req.params;
     const { winnerId } = req.body;
+    const tournamentId = parseInt(id);
+    const matchId = parseInt(mid);
 
-    const match = await prisma.tournamentMatch.update({
-        where: { id: parseInt(mid) },
-        data: { winnerId: parseInt(winnerId), playedAt: new Date() },
-    });
+    try {
+        const match = await prisma.tournamentMatch.update({
+            where: { id: matchId },
+            data: { winnerId: parseInt(winnerId), playedAt: new Date() },
+            include: {
+                player1: { include: { user: true } },
+                player2: { include: { user: true } },
+                winner: { include: { user: true } },
+            },
+        });
 
-    reply.send({ message: 'Match result submitted', match });
+        const userWinnerId = match.winner.user.id;
+        const userLoserId =
+            match.player1.userId === parseInt(winnerId)
+                ? match.player2.user.id
+                : match.player1.user.id;
 
-    const remaining = await prisma.tournamentMatch.count({
-        where: {
-            tournamentId,
-            round: match.round,
-            winnerId: null
-        }
-    });
+        await prisma.user.updateMany({
+            where: { id: { in: [userWinnerId, userLoserId] } },
+            data: {
+                totalMatches: { increment: 1 },
+            },
+        });
 
-    if (remaining === 0) {
-        const winners = await prisma.tournamentMatch.findMany({
+        await prisma.user.update({
+            where: { id: userWinnerId },
+            data: {
+                wins: { increment: 1 },
+            },
+        });
+
+        await prisma.user.update({
+            where: { id: userLoserId },
+            data: {
+                losses: { increment: 1 },
+            },
+        });
+
+        const remaining = await prisma.tournamentMatch.count({
             where: {
                 tournamentId,
-                round: match.round
-            },
-            select: {
-                winnerId: true
+                round: match.round,
+                winnerId: null
             }
         });
 
-        const winnerIds = winners.map(w => w.winnerId).filter(Boolean);
+        if (remaining === 0) {
+            const winners = await prisma.tournamentMatch.findMany({
+                where: {
+                    tournamentId,
+                    round: match.round
+                },
+                select: {
+                    winnerId: true
+                }
+            });
 
-        if (winnerIds.length === 1) {
+            const winnerIds = winners.map(w => w.winnerId).filter(Boolean);
+
+            if (winnerIds.length === 1) {
+                await prisma.tournament.update({
+                    where: { id: tournamentId },
+                    data: { currentRound: match.round + 1 }
+                });
+                return reply.send({ message: 'Tournament finished!', championId: winnerIds[0] });
+            }
+
+            const shuffled = winnerIds.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < shuffled.length; i += 2) {
+                await prisma.tournamentMatch.create({
+                    data: {
+                        tournamentId,
+                        round: match.round + 1,
+                        matchOrder: i / 2 + 1,
+                        player1Id: shuffled[i],
+                        player2Id: shuffled[i + 1],
+                    },
+                });
+            }
+
             await prisma.tournament.update({
                 where: { id: tournamentId },
                 data: { currentRound: match.round + 1 }
             });
-            return reply.send({ message: 'Tournament finished!', championId: winnerIds[0] });
         }
-
-        const shuffled = winnerIds.sort(() => Math.random() - 0.5);
-
-        for (let i = 0; i < shuffled.length; i += 2) {
-            await prisma.tournamentMatch.create({
-                data: {
-                    tournamentId,
-                    round: match.round + 1,
-                    matchOrder: i / 2 + 1,
-                    player1Id: shuffled[i],
-                    player2Id: shuffled[i + 1],
-                },
-            });
-        }
-
-        await prisma.tournament.update({
-            where: { id: tournamentId },
-            data: { currentRound: match.round + 1 }
-        });
+    } catch (err) {
+        console.error(err);
+        reply.status(500).send({ error: 'Failed to submit tournament match result.' });
     }
 };
 
