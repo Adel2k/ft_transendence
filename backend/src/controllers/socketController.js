@@ -85,6 +85,12 @@ const handleMatchSocket = (fastify) => {
                 if (msg.type === 'ping') {
                     conn.send(JSON.stringify({ type: 'pong' }));
                     return;
+                } if (msg.type === 'redirect') {
+                    conn.send(JSON.stringify({
+                        type: 'redirect',
+                        url: msg.url
+                    }));
+                    return;
                 }
                 if (msg.type === 'paddle_move') {
                     const state = matchBallState.get(matchId);
@@ -229,6 +235,24 @@ const broadcastStartToTournament = async (tournamentId, matchInfo) => {
     }
 };
 
+const broadcastTournamentEnd = async (tournamentId) => {
+    const participants = await prisma.tournamentParticipant.findMany({
+        where: { tournamentId },
+        select: { userId: true }
+    });
+
+    for (const { userId } of participants) {
+        const conn = onlineUsers.get(userId);
+        if (conn && conn.readyState === 1) {
+            conn.send(JSON.stringify({
+                type: 'redirect',
+                url: '/profile'
+            }));
+        }
+    }
+};
+
+
 const isUserOnline = (userId) => onlineUsers.has(userId);
 const getOnlineUsers = () => onlineUsers;
 
@@ -236,6 +260,7 @@ export default {
     handleConnection,
     handleMatchSocket,
     broadcastStartToTournament,
+    broadcastTournamentEnd,
     isUserOnline,
     getOnlineUsers
 };

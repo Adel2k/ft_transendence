@@ -162,7 +162,6 @@ const submitMatchResult = async (req, reply) => {
     const { winnerId } = req.body;
     const tournamentId = parseInt(id);
     const matchId = parseInt(mid);
-
     try {
         const match = await prisma.tournamentMatch.update({
             where: { id: matchId },
@@ -173,34 +172,34 @@ const submitMatchResult = async (req, reply) => {
                 winner: { include: { user: true } },
             },
         });
-
+        
         const userWinnerId = match.winner.user.id;
         const userLoserId =
-            match.player1.userId === parseInt(winnerId)
-                ? match.player2.user.id
-                : match.player1.user.id;
-
+        match.player1.userId === parseInt(winnerId)
+        ? match.player2.user.id
+        : match.player1.user.id;
+        
         await prisma.user.updateMany({
             where: { id: { in: [userWinnerId, userLoserId] } },
             data: {
                 totalMatches: { increment: 1 },
             },
         });
-
+        
         await prisma.user.update({
             where: { id: userWinnerId },
             data: {
                 wins: { increment: 1 },
             },
         });
-
+        
         await prisma.user.update({
             where: { id: userLoserId },
             data: {
                 losses: { increment: 1 },
             },
         });
-
+        
         const remaining = await prisma.tournamentMatch.count({
             where: {
                 tournamentId,
@@ -208,8 +207,9 @@ const submitMatchResult = async (req, reply) => {
                 winnerId: null
             }
         });
-
+        
         if (remaining === 0) {
+
             const winners = await prisma.tournamentMatch.findMany({
                 where: {
                     tournamentId,
@@ -219,9 +219,8 @@ const submitMatchResult = async (req, reply) => {
                     winnerId: true
                 }
             });
-
             const winnerIds = winners.map(w => w.winnerId).filter(Boolean);
-
+            
             if (winnerIds.length === 1) {
                 await prisma.tournament.update({
                     where: { id: tournamentId },
@@ -229,7 +228,7 @@ const submitMatchResult = async (req, reply) => {
                 });
                 return reply.send({ message: 'Tournament finished!', championId: winnerIds[0] });
             }
-
+            
             const shuffled = winnerIds.sort(() => Math.random() - 0.5);
 
             for (let i = 0; i < shuffled.length; i += 2) {
@@ -243,7 +242,7 @@ const submitMatchResult = async (req, reply) => {
                     },
                 });
             }
-
+            
             await prisma.tournament.update({
                 where: { id: tournamentId },
                 data: { currentRound: match.round + 1 }
