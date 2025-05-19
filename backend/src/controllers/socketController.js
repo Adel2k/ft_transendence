@@ -252,6 +252,19 @@ const broadcastTournamentEnd = async (tournamentId) => {
     }
 };
 
+async function broadcastNextMatch(tournamentId, url) {
+    const participants = await prisma.tournamentParticipant.findMany({
+        where: { tournamentId },
+        select: { userId: true }
+    });
+
+    for (const { userId } of participants) {
+        const conn = onlineUsers.get(userId);
+        if (conn && conn.readyState === 1) {
+            conn.send(JSON.stringify({ type: 'redirect', url }));
+        }
+    }
+}
 
 const isUserOnline = (userId) => onlineUsers.has(userId);
 const getOnlineUsers = () => onlineUsers;
@@ -261,6 +274,7 @@ export default {
     handleMatchSocket,
     broadcastStartToTournament,
     broadcastTournamentEnd,
+    broadcastNextMatch,
     isUserOnline,
     getOnlineUsers
 };

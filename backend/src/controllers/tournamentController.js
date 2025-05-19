@@ -248,6 +248,7 @@ const submitMatchResult = async (req, reply) => {
                 data: { currentRound: match.round + 1 }
             });
         }
+        return reply.send({ message: 'Match result submitted successfully!'});
     } catch (err) {
         console.error(err);
         reply.status(500).send({ error: 'Failed to submit tournament match result.' });

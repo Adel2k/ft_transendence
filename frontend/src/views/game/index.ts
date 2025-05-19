@@ -40,7 +40,6 @@ export async function render(root: HTMLElement, options?: { role: string, match:
                     body: JSON.stringify({ winnerId }),
                 }).then(async res => {
                     const data = await res.json();
-                    console.log('Response data:', data);
                     if (data.message === 'Tournament finished!') {
                         console.log('Tournament finished, redirecting to profile...');
                         await fetch(`/api/ws/tournament/${options?.match.tournamentId}/end`, { method: 'POST' });
@@ -50,11 +49,15 @@ export async function render(root: HTMLElement, options?: { role: string, match:
                         const nextMatchRes = await fetch(`/api/tournament/${options?.match.tournamentId}/next-match`);
                         const nextMatch = await nextMatchRes.json();
                         if (nextMatch && nextMatch.id) {
-                            console.log('Next match:', nextMatch);
-                            renderTournamentGamePage(root, options?.match.tournamentId);
+                            await fetch(`/api/ws/tournament/${options?.match.tournamentId}/next`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ url: `/tournament/game/${options?.match.tournamentId}` }),
+                            });
                         } else {
                             alert('Турнир завершён!');
-                            window.location.href = `/tournament/${options?.match.tournamentId}`;
+                            await fetch(`/api/ws/tournament/${options?.match.tournamentId}/end`, { method: 'POST' });
+                            window.location.href = '/profile';
                         }
                     }
                 });
