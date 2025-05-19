@@ -108,8 +108,16 @@ const startTournament = async (req, reply) => {
         where: { tournamentId, round: 1 },
         orderBy: { matchOrder: 'asc' },
         include: {
-            player1: true,
-            player2: true,
+            player1: {
+                include: {
+                    user: { select: { avatarUrl: true, username: true } }
+                }
+            },
+            player2: {
+                include: {
+                    user: { select: { avatarUrl: true, username: true } }
+                }
+            },
         },
     });
 
@@ -133,8 +141,16 @@ const getNextMatch = async (req, reply) => {
             { matchOrder: 'asc' },
         ],
         include: {
-            player1: true,
-            player2: true,
+            player1: {
+                include: {
+                    user: { select: { avatarUrl: true, username: true } }
+                }
+            },
+            player2: {
+                include: {
+                    user: { select: { avatarUrl: true, username: true } }
+                }
+            },
         },
     });
 
@@ -211,8 +227,18 @@ const getBracket = async (req, reply) => {
             { matchOrder: 'asc' },
         ],
         include: {
-            player1: { select: { alias: true } },
-            player2: { select: { alias: true } },
+            player1: {
+                select: { alias: true },
+                include: {
+                    user: { select: { avatarUrl: true, username: true } }
+                }
+            },
+            player2: {
+                select: { alias: true },
+                include: {
+                    user: { select: { avatarUrl: true, username: true } }
+                }
+            },
             winner: { select: { alias: true } },
         },
     });

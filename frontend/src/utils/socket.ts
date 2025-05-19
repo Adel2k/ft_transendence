@@ -30,7 +30,7 @@ function setupSocketHandlers() {
       if (socket?.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: 'ping' }));
       }
-    }, 20000); 
+    }, 5000); 
   };
 
   socket.onerror = () => {
@@ -55,6 +55,9 @@ function setupSocketHandlers() {
         window.dispatchEvent(event);
       } else if (msg.type === 'tournament_started' && msg.redirectTo) {
         window.location.href = msg.redirectTo;
+      } else if (msg.type === 'goal') {
+        const event = new CustomEvent('goal', { detail: { scorer: msg.scorer } });
+        window.dispatchEvent(event);
       }
     } catch (e) { }
   };
