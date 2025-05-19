@@ -16,5 +16,7 @@ echo "DEFAULT_AVATAR=$(echo $SECRET_JSON | jq -r '.data.data.DEFAULT_AVATAR')" >
 echo "HTTPS_CERT=$(echo $SECRET_JSON | jq -r '.data.data.HTTPS_CERT')" >> .env
 echo "HTTPS_KEY=$(echo $SECRET_JSON | jq -r '.data.data.HTTPS_KEY')" >> .env
 echo "JWT_EXPIRES_IN=$(echo $SECRET_JSON | jq -r '.data.data.JWT_EXPIRES_IN')" >> .env
+echo "GOOGLE_CLIENT_ID=$(echo $SECRET_JSON | jq -r '.data.data.GOOGLE_CLIENT_ID')" >> .env
+
 
 export $(cat .env | xargs) && node src/server.js
