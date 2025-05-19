@@ -1,7 +1,8 @@
 import prisma from '../db/prisma.js';
 
-const onlineUsers = new Map(); // userId -> WebSocket
-const matchSockets = new Map(); // matchId -> [WebSocket]
+const onlineUsers = new Map();
+const matchSockets = new Map();
+const matchBallState = new Map();
 
 const handleConnection = (fastify) => {
     return async function (conn, req) {
@@ -86,6 +87,11 @@ const handleMatchSocket = (fastify) => {
                     return;
                 }
                 if (msg.type === 'paddle_move') {
+                    const state = matchBallState.get(matchId);
+                    if (state) {
+                        if (msg.role === 'player1') state.paddle1z = msg.z;
+                        if (msg.role === 'player2') state.paddle2z = msg.z;
+                    }
                     if (![match.player1.userId, match.player2.userId].includes(userId)) {
                        return ;
                     }
@@ -112,8 +118,92 @@ const handleMatchSocket = (fastify) => {
                 matchSockets.set(matchId, sockets);
             }
         });
+
+        setTimeout(() => startBallForMatch(matchId), 5000);
     };
 };
+function startBallForMatch(matchId) {
+    let position = { x: 0, y: 0.435, z: 0 };
+    let direction = { x: 0, y: 0, z: 0 };
+    let paddle1z = 0, paddle2z = 0;
+    let paddleLength = 1.5;
+    let paddleX1 = -4.5, paddleX2 = 4.5;
+
+    if (!matchBallState.has(matchId)) {
+        matchBallState.set(matchId, { position, direction, interval: null, paddle1z, paddle2z });
+    }
+    const state = matchBallState.get(matchId);
+
+    if (!state.paddleListener) {
+        state.paddleListener = (msg) => {
+            if (msg.type === 'paddle_move') {
+                if (msg.role === 'player1') state.paddle1z = msg.z;
+                if (msg.role === 'player2') state.paddle2z = msg.z;
+            }
+        };
+    }
+
+    function generateDirection() {
+        return {
+            x: Math.random() > 0.5 ? 0.05 : -0.05,
+            y: 0,
+            z: (Math.random() * 0.06) - 0.03
+        };
+    }
+
+    function resetBall(delay = 3000) {
+        state.position = { x: 0, y: 0.435, z: 0 };
+        state.direction = { x: 0, y: 0, z: 0 };
+        setTimeout(() => {
+            state.direction = generateDirection();
+        }, delay);
+    }
+
+    function tick() {
+        let { position, direction } = state;
+        position.x += direction.x;
+        position.z += direction.z;
+
+        if (position.z > 3 || position.z < -3) direction.z *= -1;
+
+        if (
+            direction.x < 0 &&
+            position.x < paddleX1 - 0.23 &&
+            Math.abs(position.z - state.paddle1z) < paddleLength / 2
+        ) {
+            direction.x *= -1;
+            direction.z += (position.z - state.paddle1z) * 0.05;
+        }
+
+        if (
+            direction.x > 0 &&
+            position.x > paddleX2 + 0.23 &&
+            Math.abs(position.z - state.paddle2z) < paddleLength / 2
+        ) {
+            direction.x *= -1;
+            direction.z += (position.z - state.paddle2z) * 0.05;
+        }
+
+        if (position.x > 5 || position.x < -5) {
+            resetBall();
+            return;
+        }
+
+        matchSockets.get(matchId)?.forEach((client) => {
+            if (client.readyState === 1) {
+                client.send(JSON.stringify({
+                    type: 'ball_update',
+                    position,
+                    direction
+                }));
+            }
+        });
+    }
+
+    resetBall();
+    state.interval = setInterval(tick, 16);
+}
+
 
 const broadcastStartToTournament = async (tournamentId, matchInfo) => {
     const participants = await prisma.tournamentParticipant.findMany({

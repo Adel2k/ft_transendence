@@ -49,6 +49,10 @@ function setupSocketHandlers() {
         const { role, z } = msg;
         const event = new CustomEvent('paddle_move', { detail: { role, z } });
         window.dispatchEvent(event);
+      } else if (msg.type === 'ball_update') {
+        const { position, direction } = msg;
+        const event = new CustomEvent('ball_update', { detail: { position, direction } });
+        window.dispatchEvent(event);
       } else if (msg.type === 'tournament_started' && msg.redirectTo) {
         window.location.href = msg.redirectTo;
       }
