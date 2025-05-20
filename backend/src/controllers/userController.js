@@ -257,9 +257,9 @@ const getMatchHistory = async (req, reply) => {
                 ],
             },
             include: {
-                player1: { include: { user: true } },
-                player2: { include: { user: true } },
-                winner: { include: { user: true } },
+                player1: true,
+                player2: true,
+                winner: true,
                 tournament: true,
             },
             orderBy: { playedAt: 'desc' },
