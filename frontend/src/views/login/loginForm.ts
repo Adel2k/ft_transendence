@@ -1,12 +1,48 @@
 import { login } from './loginService';
 import { validateLoginForm } from './loginValidation';
 import { showNotification } from '../../components/notification';
-import { getCookie } from '../../utils/cookies';
+import { getCookie, setCookie } from '../../utils/cookies';
 import { connectToWebSocket } from '../../utils/socket';
+
+const GOOGLE_CLIENT_ID = '863001182336-hluhbj6klucqs9b87ldm58bskjnvb22m.apps.googleusercontent.com';
 
 export function setupLoginForm(root: HTMLElement) {
   const form = root.querySelector('#login-form') as HTMLFormElement;
   const registerButton = root.querySelector('#register-button') as HTMLButtonElement;
+
+  //@ts-ignore
+  window.google?.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: async (response: any) => {
+      try {
+        const res = await fetch('/api/auth/google-signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: response.credential }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          showNotification('Google sign-in failed: ' + (err.error || res.statusText), 'error');
+          return;
+        }
+
+        const { token } = await res.json();
+        setCookie('token', token);
+        showNotification('Google sign-in successful!', 'success');
+        connectToWebSocket(token);
+        history.pushState(null, '', '/home');
+        import('../../router').then((m) => m.router());
+      } catch (err) {
+        showNotification('Google sign-in error', 'error');
+      }
+    },
+  });
+  //@ts-ignore
+  window.google?.accounts.id.renderButton(
+    document.getElementById('g_id_signin'),
+    { theme: 'outline', size: 'large' }
+  );
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

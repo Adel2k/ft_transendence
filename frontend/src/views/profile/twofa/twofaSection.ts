@@ -1,13 +1,14 @@
 import { createTwoFAModal } from './twofaModal';
 import { toggleModalVisibility } from './twofaUI';
-import { setCookie } from '../../../utils/cookies';
+import { setCookie, getCookie } from '../../../utils/cookies';
 import { showNotification } from '../../../components/notification';
 import { disable2FA, enable2FA, request2FAQrCode } from './twofaService';
 
-export function createTwoFASection(is2FAEnabled: boolean): HTMLElement {
+export function createTwoFASection(): HTMLElement {
   const container = document.createElement('div');
   container.className = 'flex flex-col items-center gap-4';
 
+  const is2FAEnabled = getCookie('2fa') === 'true';
   const label = document.createElement('p');
   label.textContent = `2FA is currently ${is2FAEnabled ? 'Enabled' : 'Disabled'}`;
   label.className = 'text-lg font-bold ml-8';

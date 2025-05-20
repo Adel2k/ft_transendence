@@ -29,7 +29,7 @@ export async function render(root: HTMLElement) {
     const avatarSection = createAvatarSection(user.avatarUrl);
     const usernameSection = createUsernameSection(user.username, user.avatarUrl, user.id);
     const statsSection = createStatsSection(user.wins, user.losses);
-    const twoFASection = createTwoFASection(user.is2FAEnabled);
+    const twoFASection = createTwoFASection();
     
     const friendsSection = createFriendsSection(friends);
 
