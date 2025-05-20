@@ -18,5 +18,8 @@ echo "HTTPS_KEY=$(echo $SECRET_JSON | jq -r '.data.data.HTTPS_KEY')" >> .env
 echo "JWT_EXPIRES_IN=$(echo $SECRET_JSON | jq -r '.data.data.JWT_EXPIRES_IN')" >> .env
 echo "GOOGLE_CLIENT_ID=$(echo $SECRET_JSON | jq -r '.data.data.GOOGLE_CLIENT_ID')" >> .env
 
+npx prisma generate
+npx prisma migrate deploy
 
 export $(cat .env | xargs) && node src/server.js
+

@@ -12,9 +12,6 @@ COPY ./src/prisma ./prisma
 
 WORKDIR /app/src
 
-RUN npx prisma generate
-RUN npx prisma migrate deploy
-
 RUN mkdir -p ./prisma/images
 
 WORKDIR /app
