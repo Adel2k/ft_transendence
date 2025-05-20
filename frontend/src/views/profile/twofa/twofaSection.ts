@@ -58,7 +58,6 @@ export function createTwoFASection(is2FAEnabled: boolean): HTMLElement {
         };
       }
     } catch (e) {
-      console.error(e);
       showNotification('Error toggling 2FA', 'error');
     }
   });

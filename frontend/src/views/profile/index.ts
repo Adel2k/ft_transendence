@@ -9,7 +9,6 @@ import { createUsernameSection } from './username/usernameSection';
 
 export async function render(root: HTMLElement) {
   if (!root) {
-    console.error('Root element not found');
     return;
   }
   
@@ -26,7 +25,7 @@ export async function render(root: HTMLElement) {
     }
     
     const { user, friends, history } = await fetchUserData(token);
-    
+
     const avatarSection = createAvatarSection(user.avatarUrl);
     const usernameSection = createUsernameSection(user.username, user.avatarUrl, user.id);
     const statsSection = createStatsSection(user.wins, user.losses);
@@ -55,7 +54,6 @@ export async function render(root: HTMLElement) {
       root.appendChild(navbar);
     }
   } catch (error) {
-    console.error('Error rendering profile page:', error);
     root.innerHTML =
       '<p class="text-red-500">Failed to load profile page. Please try again later.</p>';
     sessionStorage.clear();

@@ -87,7 +87,6 @@ export function renderTournamentPage(root: HTMLElement, tournamentId: string, ma
                             invitedUsers[i] = userId;
                             updateParticipantUI();
                         } catch (e) {
-                            console.error('Invite error:', e);
                             alert('Failed to invite player.');
                         }
                     }
@@ -109,7 +108,6 @@ export function renderTournamentPage(root: HTMLElement, tournamentId: string, ma
                 return;
             }
         } catch (e) {
-            console.error('Error starting tournament:', e);
             alert('Error starting tournament');
         }
     });

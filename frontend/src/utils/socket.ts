@@ -17,8 +17,6 @@ export function connectToMatchWebSocket(token: string, matchId: number): void {
   const wsUrl = `wss://${window.location.hostname}/api/ws/match/${matchId}`;
   socket = new WebSocket(wsUrl, token);
 
-  console.log('Connecting to match WebSocket:', socket);
-
   setupSocketHandlers();
 }
 
@@ -55,6 +53,9 @@ function setupSocketHandlers() {
         window.dispatchEvent(event);
       } else if (msg.type === 'tournament_started' && msg.redirectTo) {
         window.location.href = msg.redirectTo;
+      } else if (msg.type === 'redirect') {
+        const { url } = msg;
+        window.location.href = url;
       } else if (msg.type === 'goal') {
         const event = new CustomEvent('goal', { detail: { scorer: msg.scorer } });
         window.dispatchEvent(event);

@@ -26,16 +26,13 @@ export function runGameLoop(
 
     window.addEventListener('paddle_move', (e: Event) => {
         const { role: senderRole, z } = (e as CustomEvent).detail;
-        console.log('Received paddle move:', senderRole, z);
         if (senderRole === role) return;
-        console.log('Updating paddle position:', senderRole, z);
         if (senderRole === 'player1') {
             paddle1.position.z = z;
         } else if (senderRole === 'player2') {
             paddle2.position.z = z;
-    }
+        }
     });
-
 
     window.addEventListener('ball_update', (e: Event) => {
         const { position } = (e as CustomEvent).detail;
@@ -43,7 +40,14 @@ export function runGameLoop(
         ball.position.z = position.z;
     });
 
+    let stop = false;
+    window.addEventListener('stop_ball', () => {
+        stop = true;
+    });
+
     engine.runRenderLoop(() => {
+        if (stop) return;
+
         if (role === 'player1') {
             const { w, s, arrowUp, arrowDown } = input.keysPressed;
             if ((s || arrowDown) && paddle1.position.z > -2.2) {

@@ -6,20 +6,70 @@ import socketController from './socketController.js';
 import { generateRandomAvatar } from '../utils/avatar.js';
 
 const me = async (req, reply) => {
+    const userId = req.user.id;
+
     const user = await prisma.user.findUnique({
-        where: { id: req.user.id },
+        where: { id: userId },
         select: {
             id: true,
             email: true,
             username: true,
             avatarUrl: true,
-            wins: true,
-            losses: true,
-            totalMatches: true,
         },
     });
 
-    reply.send({ user });
+    if (!user) {
+        return reply.status(404).send({ error: 'User not found' });
+    }
+
+    const matchWins = await prisma.match.count({
+        where: { winnerId: userId },
+    });
+
+    const matchLosses = await prisma.match.count({
+        where: {
+            winnerId: { not: userId },
+            OR: [
+                { player1Id: userId },
+                { player2Id: userId },
+            ],
+        },
+    });
+
+    const participants = await prisma.tournamentParticipant.findMany({
+        where: { userId },
+        select: { id: true },
+    });
+    const participantIds = participants.map(p => p.id);
+
+    const tournamentWins = await prisma.tournamentMatch.count({
+        where: {
+            winnerId: { in: participantIds },
+        },
+    });
+
+    const tournamentLosses = await prisma.tournamentMatch.count({
+        where: {
+            winnerId: { notIn: participantIds },
+            OR: [
+                { player1Id: { in: participantIds } },
+                { player2Id: { in: participantIds } },
+            ],
+        },
+    });
+
+    const totalWins = matchWins + tournamentWins;
+    const totalLosses = matchLosses + tournamentLosses;
+    const totalMatches = totalWins + totalLosses;
+
+    reply.send({
+        user: {
+            ...user,
+            wins: totalWins,
+            losses: totalLosses,
+            totalMatches,
+        },
+    });
 };
 
 const uploadAvatar = async (req, reply) => {
@@ -175,12 +225,9 @@ const getMatchHistory = async (req, reply) => {
     const userId = req.user.id;
 
     try {
-        const matches = await prisma.match.findMany({
+        const regularMatches = await prisma.match.findMany({
             where: {
-                OR: [
-                    { player1Id: userId },
-                    { player2Id: userId },
-                ],
+                OR: [{ player1Id: userId }, { player2Id: userId }],
             },
             include: {
                 player1: true,
@@ -190,21 +237,55 @@ const getMatchHistory = async (req, reply) => {
             orderBy: { playedAt: 'desc' },
         });
 
-        const history = matches.map((match) => {
+        const regularHistory = regularMatches.map((match) => {
             const isWinner = match.winnerId === userId;
+            const opponent = match.player1Id === userId ? match.player2 : match.player1;
 
             return {
                 id: match.id,
-                opponent:
-                    match.player1Id === userId
-                        ? match.player2.username
-                        : match.player1.username,
+                opponent: opponent?.username || 'Unknown',
                 result: isWinner ? 'win' : 'loss',
                 playedAt: match.playedAt,
+                type: 'casual',
             };
         });
 
-        reply.send({ history });
+        const tournamentMatches = await prisma.tournamentMatch.findMany({
+            where: {
+                OR: [
+                    { player1: { userId } },
+                    { player2: { userId } },
+                ],
+            },
+            include: {
+                player1: { include: { user: true } },
+                player2: { include: { user: true } },
+                winner: { include: { user: true } },
+                tournament: true,
+            },
+            orderBy: { playedAt: 'desc' },
+        });
+
+        const tournamentHistory = tournamentMatches.map((match) => {
+            const isWinner = match.winner?.userId === userId;
+            const isPlayer1 = match.player1.userId === userId;
+            const opponent = isPlayer1 ? match.player2.user : match.player1.user;
+
+            return {
+                id: match.id,
+                opponent: opponent?.username || 'Unknown',
+                result: isWinner ? 'win' : 'loss',
+                playedAt: match.playedAt,
+                type: 'tournament',
+                tournamentName: match.tournament.name,
+            };
+        });
+
+        const fullHistory = [...regularHistory, ...tournamentHistory].sort(
+            (a, b) => new Date(b.playedAt) - new Date(a.playedAt)
+        );
+
+        reply.send({ history: fullHistory });
     } catch (err) {
         console.error(err);
         reply.status(500).send({ error: 'Failed to load match history.' });

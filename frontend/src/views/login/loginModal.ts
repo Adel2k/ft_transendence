@@ -74,7 +74,6 @@ export function createTwoFAModal(root: HTMLElement, onSuccess: () => void): void
       connectToWebSocket(token);
       onSuccess();
     } catch (error) {
-      console.error('Error verifying 2FA:', error);
       showNotification('Failed to verify 2FA. Please try again.', 'error');
     }
   });

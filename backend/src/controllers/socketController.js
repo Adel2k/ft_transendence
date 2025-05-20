@@ -85,6 +85,12 @@ const handleMatchSocket = (fastify) => {
                 if (msg.type === 'ping') {
                     conn.send(JSON.stringify({ type: 'pong' }));
                     return;
+                } if (msg.type === 'redirect') {
+                    conn.send(JSON.stringify({
+                        type: 'redirect',
+                        url: msg.url
+                    }));
+                    return;
                 }
                 if (msg.type === 'paddle_move') {
                     const state = matchBallState.get(matchId);
@@ -188,7 +194,7 @@ function startBallForMatch(matchId) {
             const scorer = position.x > 5 ? 'player1' : 'player2';
             matchSockets.get(matchId)?.forEach((client) => {
                 if (client.readyState === 1) {
-                    client.send(JSON.stringify({ type: 'goal', scorer })); // или 'player2'
+                    client.send(JSON.stringify({ type: 'goal', scorer }));
                 }
             });
             resetBall();
@@ -229,6 +235,37 @@ const broadcastStartToTournament = async (tournamentId, matchInfo) => {
     }
 };
 
+const broadcastTournamentEnd = async (tournamentId) => {
+    const participants = await prisma.tournamentParticipant.findMany({
+        where: { tournamentId },
+        select: { userId: true }
+    });
+
+    for (const { userId } of participants) {
+        const conn = onlineUsers.get(userId);
+        if (conn && conn.readyState === 1) {
+            conn.send(JSON.stringify({
+                type: 'redirect',
+                url: '/profile'
+            }));
+        }
+    }
+};
+
+async function broadcastNextMatch(tournamentId, url) {
+    const participants = await prisma.tournamentParticipant.findMany({
+        where: { tournamentId },
+        select: { userId: true }
+    });
+
+    for (const { userId } of participants) {
+        const conn = onlineUsers.get(userId);
+        if (conn && conn.readyState === 1) {
+            conn.send(JSON.stringify({ type: 'redirect', url }));
+        }
+    }
+}
+
 const isUserOnline = (userId) => onlineUsers.has(userId);
 const getOnlineUsers = () => onlineUsers;
 
@@ -236,6 +273,8 @@ export default {
     handleConnection,
     handleMatchSocket,
     broadcastStartToTournament,
+    broadcastTournamentEnd,
+    broadcastNextMatch,
     isUserOnline,
     getOnlineUsers
 };
