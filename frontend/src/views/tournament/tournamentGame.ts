@@ -11,6 +11,8 @@ export async function renderTournamentGamePage(root: HTMLElement, tournamentId: 
     const res = await fetch(`/api/tournament/${tournamentId}/next-match`);
     const match = await res.json();
 
+    console.log('Match:', match);
+
     if (!match || match.message === 'No pending matches') {
         root.innerHTML = `<div class="text-2xl text-white text-center mt-10">Турнир завершён!</div>`;
         return;
@@ -21,6 +23,7 @@ export async function renderTournamentGamePage(root: HTMLElement, tournamentId: 
     window.addEventListener('beforeunload', () => {
         disconnectWebSocket();
     });
+    
     let role: 'player1' | 'player2' | 'spectator' = 'spectator';
     if (match && match.player1 && match.player2) {
         const userId = JSON.parse(atob(token.split('.')[1])).id;

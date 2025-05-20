@@ -1,8 +1,6 @@
 import { createPongScene } from './createScene';
 import { createNavbar } from '../../components/navbars';
 import { createMatchInfo } from './matchInfo';
-import { renderTournamentGamePage } from '../tournament/tournamentGame';
-import { getWebSocket } from '../../utils/socket';
 import { showNotification } from '../../components/notification';
 
 export async function render(root: HTMLElement, options?: { role: string, match: any, tournamentId?: string }) {
@@ -29,11 +27,11 @@ export async function render(root: HTMLElement, options?: { role: string, match:
         matchInfo.querySelector('#score-p1')!.textContent = scores.player1.toString();
         matchInfo.querySelector('#score-p2')!.textContent = scores.player2.toString();
 
-        if (scores.player1 >= 5 || scores.player2 >= 5) {
+        if (scores.player1 >= 2 || scores.player2 >= 2) {
             window.dispatchEvent(new CustomEvent('stop_ball'));
 
-            const winnerId = scores.player1 >= 5 ? options?.match.player1.userId : options?.match.player2.userId;
-            const winnerRole = scores.player1 >= 5 ? 'player1' : 'player2';
+            const winnerId = scores.player1 >= 2 ? options?.match.player1.userId : options?.match.player2.userId;
+            const winnerRole = scores.player1 >= 2 ? 'player1' : 'player2';
             const tournamentId = options?.match.tournamentId;
             const matchId = options?.match.id;
 
@@ -49,19 +47,11 @@ export async function render(root: HTMLElement, options?: { role: string, match:
                         await fetch(`/api/ws/tournament/${tournamentId}/end`, { method: 'POST' });
                         window.location.href = '/profile';
                     } else {
-                        const nextMatchRes = await fetch(`/api/tournament/${tournamentId}/next-match`);
-                        const nextMatch = await nextMatchRes.json();
-                        if (nextMatch && nextMatch.id) {
-                            await fetch(`/api/ws/tournament/${tournamentId}/next`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ url: `/tournament/game/${tournamentId}` }),
-                            });
-                        } else {
-                            showNotification('Tournament finished!', 'info');
-                            await fetch(`/api/ws/tournament/${tournamentId}/end`, { method: 'POST' });
-                            window.location.href = '/profile';
-                        }
+                        await fetch(`/api/ws/tournament/${tournamentId}/next`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: `/tournament/game/${tournamentId}` }),
+                        });
                     }
                 });
             }
