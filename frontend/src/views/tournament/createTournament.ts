@@ -1,6 +1,7 @@
 import { createNavbar } from '../../components/navbars';
 import { createFloatingShape } from '../shape/shapes';
 import { getCookie } from '../../utils/cookies';
+import { showNotification } from '../../components/notification';
 
 
 export async function createTournamentUI(): Promise<HTMLElement> {
@@ -54,7 +55,7 @@ export async function createTournamentUI(): Promise<HTMLElement> {
         const maxPlayers = parseInt(selectInput?.value || '4', 10);
 
         if (!name) {
-            alert('Please enter a tournament name.');
+            showNotification('Please enter a tournament name.', 'error');
             return;
         }
 
@@ -67,12 +68,12 @@ export async function createTournamentUI(): Promise<HTMLElement> {
 
             if (!response.ok) {
                 const error = await response.json();
-                alert(`Error: ${error.error}`);
+                showNotification(`Error: ${error.error}`, 'error');
                 return;
             }
 
             const tournament = await response.json();
-            alert(`Tournament "${tournament.name}" created successfully!`);
+            showNotification(`Tournament  <<${tournament.name}>>  created successfully!`, 'success');
 
             const userResponse = await fetch('/api/user/me', {
                 headers: { Authorization: `Bearer ${token}` },
@@ -93,12 +94,12 @@ export async function createTournamentUI(): Promise<HTMLElement> {
             
             if (!res.ok) {
                 const err = await res.json();
-                alert(`Error inviting ${userId}: ${err.error}`);
+                showNotification(`Error inviting ${userId}: ${err.error}`, 'error');
                 return;
             }
             window.location.href = `/tournament/${tournament.id}/${maxPlayers}`;
         } catch (error) {
-            alert('Failed to create tournament. Please try again.');
+            showNotification('Failed to create tournament. Please try again.', 'error');
         }
     });
 

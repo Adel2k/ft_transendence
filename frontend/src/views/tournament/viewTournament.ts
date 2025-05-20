@@ -2,6 +2,7 @@ import { createNavbar } from '../../components/navbars';
 import { getCookie } from '../../utils/cookies';
 import { createFloatingShape } from '../shape/shapes';
 import { connectToWebSocket } from '../../utils/socket';
+import { showNotification } from '../../components/notification';
 
 export function renderTournamentPage(root: HTMLElement, tournamentId: string, maxPlayers: number) {
     root.innerHTML = '';
@@ -63,32 +64,70 @@ export function renderTournamentPage(root: HTMLElement, tournamentId: string, ma
                 slot.textContent = invitedUsers[i];
                 slot.classList.add('bg-green-500');
             } else {
-                slot.innerHTML = '+';
-                slot.classList.add('bg-gray-700', 'hover:bg-gray-600');
-                slot.addEventListener('click', async () => {
-                    const userId = prompt('Enter player userId to invite:');
-                    if (userId) {
-                        try {
-                            const res = await fetch(`/api/tournament/${tournamentId}/join`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${token}`
-                                },
-                                body: JSON.stringify({ userId })
-                            });
+                slot.innerHTML = `
+                    <div class="relative w-full h-full flex items-center justify-center">
+                        <button
+                        class="invite-btn flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition"
+                        title="Пригласить игрока">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        </button>
+                        <input
+                        type="number"
+                        min="1"
+                        placeholder="ID"
+                        class="invite-input absolute top-full mt-2 w-20 h-9 rounded-md px-3 py-1.5 text-sm text-black bg-white shadow-lg border border-gray-300 transition-all opacity-0 scale-95 pointer-events-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    `;
 
-                            if (!res.ok) {
-                                const err = await res.json();
-                                alert(`Error inviting ${userId}: ${err.error}`);
-                                return;
+                const btn = slot.querySelector('.invite-btn') as HTMLButtonElement;
+                const input = slot.querySelector('.invite-input') as HTMLInputElement;
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    input.style.opacity = '1';
+                    input.style.pointerEvents = 'auto';
+                    input.style.transform = 'scale(1)';
+                    input.focus();
+                });
+
+                input.addEventListener('blur', () => {
+                    input.style.opacity = '0';
+                    input.style.pointerEvents = 'none';
+                    input.style.transform = 'scale(0.95)';
+                });
+
+
+                input.addEventListener('keydown', async (e) => {
+                    if (e.key === 'Enter') {
+                        const userId = input.value.trim();
+                        if (userId) {
+                            try {
+                                const res = await fetch(`/api/tournament/${tournamentId}/join`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({ userId })
+                                });
+
+                                if (!res.ok) {
+                                    const err = await res.json();
+                                    showNotification(`Failed to invite ${userId}: ${err.error}`, 'error');
+                                    return;
+                                }
+
+                                invitedUsers[i] = userId;
+                                showNotification(`User ${userId} has been invited!`, 'success');
+                                updateParticipantUI();
+                            } catch (e) {
+                                showNotification('Failed to invite player.', 'error');
                             }
-
-                            invitedUsers[i] = userId;
-                            updateParticipantUI();
-                        } catch (e) {
-                            alert('Failed to invite player.');
                         }
+                        input.blur();
                     }
                 });
             }
@@ -104,11 +143,11 @@ export function renderTournamentPage(root: HTMLElement, tournamentId: string, ma
             const startRes = await fetch(`/api/tournament/${tournamentId}/start`, { method: 'POST' });
             if (!startRes.ok) {
                 const err = await startRes.json();
-                alert(`Start failed: ${err.error}`);
+                showNotification(`Failed to start: ${err.error}`, 'error');
                 return;
             }
         } catch (e) {
-            alert('Error starting tournament');
+            showNotification('Failed to start the tournament', 'error');
         }
     });
 

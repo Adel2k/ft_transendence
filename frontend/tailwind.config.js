@@ -47,6 +47,14 @@ module.exports = {
         'behind': '4px 4px 8px rgba(45, 45, 45, 1)',
       },
     },
+    screens: {
+      'xs': '420px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
   },
   plugins: [
     require('tailwindcss-textshadow'),

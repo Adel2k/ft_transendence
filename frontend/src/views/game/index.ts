@@ -3,6 +3,7 @@ import { createNavbar } from '../../components/navbars';
 import { createMatchInfo } from './matchInfo';
 import { renderTournamentGamePage } from '../tournament/tournamentGame';
 import { getWebSocket } from '../../utils/socket';
+import { showNotification } from '../../components/notification';
 
 export async function render(root: HTMLElement, options?: { role: string, match: any, tournamentId?: string }) {
     root.innerHTML = '';
@@ -44,6 +45,7 @@ export async function render(root: HTMLElement, options?: { role: string, match:
                 }).then(async res => {
                     const data = await res.json();
                     if (data.message === 'Tournament finished!') {
+                        showNotification('Tournament finished!', 'info');
                         await fetch(`/api/ws/tournament/${tournamentId}/end`, { method: 'POST' });
                         window.location.href = '/profile';
                     } else {
@@ -56,7 +58,7 @@ export async function render(root: HTMLElement, options?: { role: string, match:
                                 body: JSON.stringify({ url: `/tournament/game/${tournamentId}` }),
                             });
                         } else {
-                            alert('Турнир завершён!');
+                            showNotification('Tournament finished!', 'info');
                             await fetch(`/api/ws/tournament/${tournamentId}/end`, { method: 'POST' });
                             window.location.href = '/profile';
                         }
