@@ -6,20 +6,70 @@ import socketController from './socketController.js';
 import { generateRandomAvatar } from '../utils/avatar.js';
 
 const me = async (req, reply) => {
+    const userId = req.user.id;
+
     const user = await prisma.user.findUnique({
-        where: { id: req.user.id },
+        where: { id: userId },
         select: {
             id: true,
             email: true,
             username: true,
             avatarUrl: true,
-            wins: true,
-            losses: true,
-            totalMatches: true,
         },
     });
 
-    reply.send({ user });
+    if (!user) {
+        return reply.status(404).send({ error: 'User not found' });
+    }
+
+    const matchWins = await prisma.match.count({
+        where: { winnerId: userId },
+    });
+
+    const matchLosses = await prisma.match.count({
+        where: {
+            winnerId: { not: userId },
+            OR: [
+                { player1Id: userId },
+                { player2Id: userId },
+            ],
+        },
+    });
+
+    const participants = await prisma.tournamentParticipant.findMany({
+        where: { userId },
+        select: { id: true },
+    });
+    const participantIds = participants.map(p => p.id);
+
+    const tournamentWins = await prisma.tournamentMatch.count({
+        where: {
+            winnerId: { in: participantIds },
+        },
+    });
+
+    const tournamentLosses = await prisma.tournamentMatch.count({
+        where: {
+            winnerId: { notIn: participantIds },
+            OR: [
+                { player1Id: { in: participantIds } },
+                { player2Id: { in: participantIds } },
+            ],
+        },
+    });
+
+    const totalWins = matchWins + tournamentWins;
+    const totalLosses = matchLosses + tournamentLosses;
+    const totalMatches = totalWins + totalLosses;
+
+    reply.send({
+        user: {
+            ...user,
+            wins: totalWins,
+            losses: totalLosses,
+            totalMatches,
+        },
+    });
 };
 
 const uploadAvatar = async (req, reply) => {
