@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,96 +8,82 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  username      String   @unique
-  password      String?
-  avatarUrl     String?
-  is2faEnabled  Boolean  @default(false)
-  twofaSecret   String?  // nullable
-  googleId      String?  @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  username     String   @unique
+  password     String?
+  avatarUrl    String?
+  is2faEnabled Boolean  @default(false)
+  twofaSecret  String?
+  googleId     String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  wins           Int           @default(0)
-  losses         Int           @default(0)
-  totalMatches   Int           @default(0)
+  wins         Int @default(0)
+  losses       Int @default(0)
+  totalMatches Int @default(0)
 
-  friends       Friendship[]  @relation("UserFriend")
-  friendOf      Friendship[]  @relation("FriendOf")
+  friends  Friendship[] @relation("UserFriend")
+  friendOf Friendship[] @relation("FriendOf")
 
   matchesAsPlayer1 Match[] @relation("Player1")
   matchesAsPlayer2 Match[] @relation("Player2")
   matchesWon       Match[] @relation("MatchWinner")
 
-  tournaments      TournamentParticipant[]
+  tournamentMatchesAsPlayer1 TournamentMatch[] @relation("TournamentPlayer1")
+  tournamentMatchesAsPlayer2 TournamentMatch[] @relation("TournamentPlayer2")
+  tournamentMatchesWon       TournamentMatch[] @relation("TournamentWinner")
 }
 
 model Friendship {
-  id        Int    @id @default(autoincrement())
-  userId    Int
-  friendId  Int
+  id       Int @id @default(autoincrement())
+  userId   Int
+  friendId Int
 
-  user      User   @relation("UserFriend", fields: [userId], references: [id])
-  friend    User   @relation("FriendOf", fields: [friendId], references: [id])
+  user   User @relation("UserFriend", fields: [userId], references: [id])
+  friend User @relation("FriendOf", fields: [friendId], references: [id])
 
   @@unique([userId, friendId])
 }
 
 model Match {
-  id         Int      @id @default(autoincrement())
-  player1    User     @relation("Player1", fields: [player1Id], references: [id])
-  player1Id  Int
+  id        Int  @id @default(autoincrement())
+  player1   User @relation("Player1", fields: [player1Id], references: [id])
+  player1Id Int
 
-  player2    User     @relation("Player2", fields: [player2Id], references: [id])
-  player2Id  Int
+  player2   User @relation("Player2", fields: [player2Id], references: [id])
+  player2Id Int
 
-  winner     User     @relation("MatchWinner", fields: [winnerId], references: [id])
-  winnerId   Int
+  winner   User @relation("MatchWinner", fields: [winnerId], references: [id])
+  winnerId Int
 
-  playedAt   DateTime @default(now())
+  playedAt DateTime @default(now())
 }
 
 model Tournament {
-  id            Int                     @id @default(autoincrement())
-  name          String
-  createdAt     DateTime                @default(now())
-  currentRound  Int                     @default(1)
+  id           Int      @id @default(autoincrement())
+  name         String
+  createdAt    DateTime @default(now())
+  currentRound Int      @default(1)
 
-  participants  TournamentParticipant[]
-  matches       TournamentMatch[]
-}
-
-model TournamentParticipant {
-  id           Int                     @id @default(autoincrement())
-  userId       Int
-  tournamentId Int
-  alias        String
-  joinedAt     DateTime                @default(now())
-
-  user         User                    @relation(fields: [userId], references: [id])
-  tournament   Tournament              @relation(fields: [tournamentId], references: [id])
-
-  matchesAsPlayer1 TournamentMatch[]   @relation("TournamentPlayer1")
-  matchesAsPlayer2 TournamentMatch[]   @relation("TournamentPlayer2")
-  matchesWon       TournamentMatch[]   @relation("TournamentWinner")
+  matches TournamentMatch[]
 }
 
 model TournamentMatch {
-  id           Int                     @id @default(autoincrement())
+  id           Int @id @default(autoincrement())
   tournamentId Int
   round        Int
   matchOrder   Int
 
-  player1Id    Int
-  player2Id    Int
-  winnerId     Int?
+  player1Id Int
+  player2Id Int
+  winnerId  Int?
 
-  playedAt     DateTime?
+  playedAt DateTime?
 
-  tournament   Tournament              @relation(fields: [tournamentId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
 
-  player1      TournamentParticipant   @relation("TournamentPlayer1", fields: [player1Id], references: [id])
-  player2      TournamentParticipant   @relation("TournamentPlayer2", fields: [player2Id], references: [id])
-  winner       TournamentParticipant?  @relation("TournamentWinner", fields: [winnerId], references: [id])
+  player1 User  @relation("TournamentPlayer1", fields: [player1Id], references: [id])
+  player2 User  @relation("TournamentPlayer2", fields: [player2Id], references: [id])
+  winner  User? @relation("TournamentWinner", fields: [winnerId], references: [id])
 }

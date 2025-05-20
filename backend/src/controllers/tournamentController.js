@@ -21,80 +21,32 @@ const createTournament = async (req, reply) => {
     reply.send(tournament);
 };
 
-const joinTournament = async (req, reply) => {
-    const { id } = req.params;
-    let { userId } = req.body;
-
-    userId = Number(userId);
-    const tournamentId = Number(id);
-
-    if (!Number.isInteger(userId) || !Number.isInteger(tournamentId)) {
-        return reply.status(400).send({ error: 'Invalid userId or tournamentId' });
-    }
-
-    const tournament = await prisma.tournament.findUnique({
-        where: { id: tournamentId }
-    });
-
-    if (!tournament || tournament.currentRound > 0) {
-        return reply.status(400).send({ error: 'Tournament already started or not found' });
-    }
-
-    const onlineUsers = socketController.getOnlineUsers();
-    if (!onlineUsers.has(userId)) {
-        return reply.status(403).send({ error: 'User must be online to join the tournament' });
-    }
-
-    const existing = await prisma.tournamentParticipant.findFirst({
-        where: { userId, tournamentId },
-    });
-
-    if (existing) {
-        return reply.status(400).send({ error: 'User has already joined the tournament' });
-    }
-
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-        return reply.status(404).send({ error: 'User not found' });
-    }
-
-    const participant = await prisma.tournamentParticipant.create({
-        data: {
-            alias: user.username,
-            tournamentId,
-            userId,
-        },
-    });
-
-    reply.send(participant);
-};
-
-const listParticipants = async (req, reply) => {
-    const { id } = req.params;
-    const participants = await prisma.tournamentParticipant.findMany({
-        where: { tournamentId: parseInt(id) },
-        select: { id: true, alias: true },
-    });
-    reply.send(participants);
-};
-
 const startTournament = async (req, reply) => {
     const { id } = req.params;
     const tournamentId = parseInt(id);
+    const { userIds } = req.body;
 
-    const participants = await prisma.tournamentParticipant.findMany({
-        where: { tournamentId },
-        include: {
-            user: {
-                select: { id: true, username: true, avatarUrl: true },
-            },
-        },
+    if (!Array.isArray(userIds) || userIds.length < 2 || userIds.length % 2 !== 0) {
+        return reply.status(400).send({ error: 'Provide an even number of userIds (at least 2).' });
+    }
+
+    const onlineUsers = socketController.getOnlineUsers();
+    for (const userId of userIds) {
+        if (!onlineUsers.has(userId)) {
+            return reply.status(403).send({ error: `User ${userId} must be online to join the tournament.` });
+        }
+    }
+
+    const users = await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, username: true, avatarUrl: true },
     });
 
-    if (participants.length % 2 !== 0)
-        return reply.status(400).send({ error: 'Number of players must be even' });
+    if (users.length !== userIds.length) {
+        return reply.status(404).send({ error: 'One or more users not found.' });
+    }
 
-    const shuffled = fisherYatesShuffle([...participants]);
+    const shuffled = fisherYatesShuffle([...users]);
 
     for (let i = 0; i < shuffled.length; i += 2) {
         await prisma.tournamentMatch.create({
@@ -113,9 +65,9 @@ const startTournament = async (req, reply) => {
         data: { currentRound: 1 },
     });
 
-    await socketController.broadcastStartToTournament(tournamentId, {
-        player1Id: shuffled[0].user.id,
-        player2Id: shuffled[1].user.id,
+    await socketController.broadcastStartToTournament(userIds, {
+        player1Id: shuffled[0].id,
+        player2Id: shuffled[1].id,
     });
 
     reply.send({ message: 'Tournament started!' });
@@ -132,21 +84,19 @@ const getNextMatch = async (req, reply) => {
             { round: 'asc' },
             { matchOrder: 'asc' },
         ],
-        select: {
-            id: true,
-            tournamentId: true,
+        include: {
             player1: {
                 select: {
-                    userId: true,
-                    alias: true,
-                    user: { select: { avatarUrl: true, username: true } }
+                    id: true,
+                    username: true,
+                    avatarUrl: true,
                 }
             },
             player2: {
                 select: {
-                    userId: true,
-                    alias: true,
-                    user: { select: { avatarUrl: true, username: true } }
+                    id: true,
+                    username: true,
+                    avatarUrl: true,
                 }
             },
         },
@@ -162,9 +112,18 @@ const submitMatchResult = async (req, reply) => {
     const matchId = parseInt(mid);
 
     try {
-        const existing = await prisma.tournamentMatch.findUnique({ where: { id: matchId } });
-        if (existing?.winnerId)
+        const existing = await prisma.tournamentMatch.findUnique({
+            where: { id: matchId },
+            select: { winnerId: true, player1Id: true, player2Id: true }
+        });
+
+        if (existing?.winnerId) {
             return reply.status(400).send({ error: 'Match result already submitted' });
+        }
+
+        if (![existing.player1Id, existing.player2Id].includes(parseInt(winnerId))) {
+            return reply.status(400).send({ error: 'Winner must be one of the two match players' });
+        }
 
         const match = await prisma.tournamentMatch.update({
             where: { id: matchId },
@@ -191,29 +150,33 @@ const submitMatchResult = async (req, reply) => {
                     round: match.round
                 },
                 select: {
-                    winner: {
-                        select: {
-                            id: true,
-                            userId: true
-                        }
-                    }
+                    winner: { select: { id: true } }
                 }
             });
 
-            const winnerParticipants = winners.map(w => w.winner).filter(Boolean);
-            const winnerParticipantIds = winnerParticipants.map(p => p.id);
+            const winnerIds = winners.map(w => w.winner?.id).filter(Boolean);
 
-            if (winnerParticipantIds.length === 1) {
+            if (winnerIds.length === 1) {
                 await prisma.tournament.update({
                     where: { id: match.tournamentId },
                     data: { currentRound: match.round + 1 }
                 });
-                return reply.send({ message: 'Tournament finished!', championId: winnerParticipants[0].userId });
+                return reply.send({ message: 'Tournament finished!', championId: winnerIds[0] });
             }
 
-            const shuffled = fisherYatesShuffle([...winnerParticipantIds]);
+            const uniqueWinners = [...new Set(winnerIds)];
+
+            if (uniqueWinners.length % 2 !== 0) {
+                return reply.status(400).send({ error: 'Odd number of unique winners. Cannot pair up evenly.' });
+            }
+
+            const shuffled = fisherYatesShuffle([...uniqueWinners]);
 
             for (let i = 0; i < shuffled.length; i += 2) {
+                if (shuffled[i] === shuffled[i + 1]) {
+                    return reply.status(500).send({ error: 'Cannot create match with the same user for both players.' });
+                }
+
                 await prisma.tournamentMatch.create({
                     data: {
                         tournamentId: match.tournamentId,
@@ -247,21 +210,9 @@ const getBracket = async (req, reply) => {
             { matchOrder: 'asc' },
         ],
         include: {
-            player1: {
-                select: {
-                    alias: true,
-                    user: { select: { avatarUrl: true, username: true } },
-                },
-            },
-            player2: {
-                select: {
-                    alias: true,
-                    user: { select: { avatarUrl: true, username: true } },
-                },
-            },
-            winner: {
-                select: { alias: true },
-            },
+            player1: { select: { id: true, username: true, avatarUrl: true } },
+            player2: { select: { id: true, username: true, avatarUrl: true } },
+            winner:  { select: { id: true, username: true } },
         },
     });
 
@@ -270,8 +221,6 @@ const getBracket = async (req, reply) => {
 
 export default {
     createTournament,
-    joinTournament,
-    listParticipants,
     startTournament,
     getNextMatch,
     submitMatchResult,
