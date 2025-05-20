@@ -37,23 +37,23 @@ const me = async (req, reply) => {
     });
 
     const tournamentWins = await prisma.tournamentMatch.count({
-    where: {
-        winnerId: userId,
-    },
+        where: {
+            winnerId: userId,
+        },
     });
 
     const tournamentLosses = await prisma.tournamentMatch.count({
-    where: {
-        winnerId: {
-        not: userId,
+        where: {
+            winnerId: {
+                not: userId,
+            },
+            AND: {
+                OR: [
+                    { player1Id: userId },
+                    { player2Id: userId },
+                ],
+            },
         },
-        AND: {
-        OR: [
-            { player1Id: userId },
-            { player2Id: userId },
-        ],
-        },
-    },
     });
 
 
@@ -135,9 +135,9 @@ const updateAvatar = async (req, reply) => {
         }
 
         const newAvatar =
-        avatarUrl && avatarUrl.trim() !== ''
-          ? avatarUrl
-          : generateRandomAvatar(user.username);
+            avatarUrl && avatarUrl.trim() !== ''
+                ? avatarUrl
+                : generateRandomAvatar(user.username);
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },
@@ -252,8 +252,8 @@ const getMatchHistory = async (req, reply) => {
         const tournamentMatches = await prisma.tournamentMatch.findMany({
             where: {
                 OR: [
-                    { player1: { userId } },
-                    { player2: { userId } },
+                    { player1Id: userId },
+                    { player2Id: userId },
                 ],
             },
             include: {
