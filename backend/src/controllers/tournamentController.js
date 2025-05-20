@@ -191,20 +191,27 @@ const submitMatchResult = async (req, reply) => {
                     round: match.round
                 },
                 select: {
-                    winnerId: true
+                    winner: {
+                        select: {
+                            id: true,
+                            userId: true
+                        }
+                    }
                 }
             });
-            const winnerIds = winners.map(w => w.winnerId).filter(Boolean);
 
-            if (winnerIds.length === 1) {
+            const winnerParticipants = winners.map(w => w.winner).filter(Boolean);
+            const winnerParticipantIds = winnerParticipants.map(p => p.id);
+
+            if (winnerParticipantIds.length === 1) {
                 await prisma.tournament.update({
                     where: { id: match.tournamentId },
                     data: { currentRound: match.round + 1 }
                 });
-                return reply.send({ message: 'Tournament finished!', championId: winnerIds[0] });
+                return reply.send({ message: 'Tournament finished!', championId: winnerParticipants[0].userId });
             }
 
-            const shuffled = fisherYatesShuffle([...winnerIds]);
+            const shuffled = fisherYatesShuffle([...winnerParticipantIds]);
 
             for (let i = 0; i < shuffled.length; i += 2) {
                 await prisma.tournamentMatch.create({
