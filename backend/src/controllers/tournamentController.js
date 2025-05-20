@@ -132,14 +132,20 @@ const getNextMatch = async (req, reply) => {
             { round: 'asc' },
             { matchOrder: 'asc' },
         ],
-        include: {
+        select: {
+            id: true,
+            tournamentId: true,
             player1: {
-                include: {
+                select: {
+                    userId: true,
+                    alias: true,
                     user: { select: { avatarUrl: true, username: true } }
                 }
             },
             player2: {
-                include: {
+                select: {
+                    userId: true,
+                    alias: true,
                     user: { select: { avatarUrl: true, username: true } }
                 }
             },
@@ -163,11 +169,16 @@ const submitMatchResult = async (req, reply) => {
         const match = await prisma.tournamentMatch.update({
             where: { id: matchId },
             data: { winnerId: parseInt(winnerId), playedAt: new Date() },
+            select: {
+                id: true,
+                round: true,
+                tournamentId: true,
+            },
         });
 
         const remaining = await prisma.tournamentMatch.count({
             where: {
-                tournamentId,
+                tournamentId: match.tournamentId,
                 round: match.round,
                 winnerId: null
             }
@@ -176,7 +187,7 @@ const submitMatchResult = async (req, reply) => {
         if (remaining === 0) {
             const winners = await prisma.tournamentMatch.findMany({
                 where: {
-                    tournamentId,
+                    tournamentId: match.tournamentId,
                     round: match.round
                 },
                 select: {
@@ -187,7 +198,7 @@ const submitMatchResult = async (req, reply) => {
 
             if (winnerIds.length === 1) {
                 await prisma.tournament.update({
-                    where: { id: tournamentId },
+                    where: { id: match.tournamentId },
                     data: { currentRound: match.round + 1 }
                 });
                 return reply.send({ message: 'Tournament finished!', championId: winnerIds[0] });
@@ -198,7 +209,7 @@ const submitMatchResult = async (req, reply) => {
             for (let i = 0; i < shuffled.length; i += 2) {
                 await prisma.tournamentMatch.create({
                     data: {
-                        tournamentId,
+                        tournamentId: match.tournamentId,
                         round: match.round + 1,
                         matchOrder: i / 2 + 1,
                         player1Id: shuffled[i],
@@ -208,7 +219,7 @@ const submitMatchResult = async (req, reply) => {
             }
 
             await prisma.tournament.update({
-                where: { id: tournamentId },
+                where: { id: match.tournamentId },
                 data: { currentRound: match.round + 1 }
             });
         }
