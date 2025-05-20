@@ -46,7 +46,7 @@ export function runGameLoop(
     });
 
     engine.runRenderLoop(() => {
-        if (stop) return; // Останавливаем обновление мяча и сцену
+        if (stop) return;
 
         if (role === 'player1') {
             const { w, s, arrowUp, arrowDown } = input.keysPressed;

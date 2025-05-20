@@ -194,7 +194,7 @@ function startBallForMatch(matchId) {
             const scorer = position.x > 5 ? 'player1' : 'player2';
             matchSockets.get(matchId)?.forEach((client) => {
                 if (client.readyState === 1) {
-                    client.send(JSON.stringify({ type: 'goal', scorer })); // или 'player2'
+                    client.send(JSON.stringify({ type: 'goal', scorer }));
                 }
             });
             resetBall();

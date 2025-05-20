@@ -22,8 +22,6 @@ const joinTournament = async (req, reply) => {
         return reply.status(400).send({ error: 'Invalid userId or tournamentId' });
     }
 
-    console.log('User ID:', userId);
-
     const tournament = await prisma.tournament.findUnique({
         where: { id: tournamentId }
     });

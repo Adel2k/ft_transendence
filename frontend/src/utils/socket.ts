@@ -17,8 +17,6 @@ export function connectToMatchWebSocket(token: string, matchId: number): void {
   const wsUrl = `wss://${window.location.hostname}/api/ws/match/${matchId}`;
   socket = new WebSocket(wsUrl, token);
 
-  console.log('Connecting to match WebSocket:', socket);
-
   setupSocketHandlers();
 }
 

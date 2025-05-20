@@ -175,7 +175,6 @@ const getMatchHistory = async (req, reply) => {
     const userId = req.user.id;
 
     try {
-        // Regular matches
         const regularMatches = await prisma.match.findMany({
             where: {
                 OR: [{ player1Id: userId }, { player2Id: userId }],
@@ -201,7 +200,6 @@ const getMatchHistory = async (req, reply) => {
             };
         });
 
-        // Tournament matches
         const tournamentMatches = await prisma.tournamentMatch.findMany({
             where: {
                 OR: [

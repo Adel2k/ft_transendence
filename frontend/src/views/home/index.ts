@@ -6,7 +6,6 @@ import { getCookie } from '../../utils/cookies';
 
 export async function render(root: HTMLElement) {
   if (!root) {
-    console.error('Root element not found');
     return;
   }
 
@@ -27,7 +26,6 @@ export async function render(root: HTMLElement) {
       root.appendChild(navbar);
     }
   } catch (error) {
-    console.error('Error rendering profile page:', error);
     root.innerHTML =
       '<p class="text-red-500">Failed to load profile page. Please try again later.</p>';
     sessionStorage.clear();

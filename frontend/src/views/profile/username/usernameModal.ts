@@ -43,7 +43,6 @@ export function createUsernameModal(
       await onSave(newUsername);
       modal.classList.add('hidden');
     } catch (error) {
-      console.error('Error saving username:', error);
       showNotification('Failed to update username. Please try again.', 'error');
     }
   });

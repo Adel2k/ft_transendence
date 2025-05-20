@@ -98,7 +98,6 @@ export async function createTournamentUI(): Promise<HTMLElement> {
             }
             window.location.href = `/tournament/${tournament.id}/${maxPlayers}`;
         } catch (error) {
-            console.error('Failed to create tournament:', error);
             alert('Failed to create tournament. Please try again.');
         }
     });

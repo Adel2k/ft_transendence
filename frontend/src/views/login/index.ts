@@ -4,7 +4,6 @@ import { createTwoFAModal } from './loginModal';
 
 export async function render(root: HTMLElement) {
   if (!root) {
-    console.error('Root element not found');
     return;
   }
 
