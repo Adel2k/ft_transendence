@@ -21,5 +21,7 @@ echo "GOOGLE_CLIENT_ID=$(echo $SECRET_JSON | jq -r '.data.data.GOOGLE_CLIENT_ID'
 npx prisma generate
 npx prisma migrate deploy
 
+mkdir -p ./prisma/images
+
 export $(cat .env | xargs) && node src/server.js
 

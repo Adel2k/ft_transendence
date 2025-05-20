@@ -12,8 +12,6 @@ COPY ./src/prisma ./prisma
 
 WORKDIR /app/src
 
-RUN mkdir -p ./prisma/images
-
 WORKDIR /app
 COPY load_secrets.sh .
 RUN chmod +x load_secrets.sh
