@@ -36,27 +36,26 @@ const me = async (req, reply) => {
         },
     });
 
-    const participants = await prisma.tournamentParticipant.findMany({
-        where: { userId },
-        select: { id: true },
-    });
-    const participantIds = participants.map(p => p.id);
-
     const tournamentWins = await prisma.tournamentMatch.count({
-        where: {
-            winnerId: { in: participantIds },
-        },
+    where: {
+        winnerId: userId,
+    },
     });
 
     const tournamentLosses = await prisma.tournamentMatch.count({
-        where: {
-            winnerId: { notIn: participantIds },
-            OR: [
-                { player1Id: { in: participantIds } },
-                { player2Id: { in: participantIds } },
-            ],
+    where: {
+        winnerId: {
+        not: userId,
         },
+        AND: {
+        OR: [
+            { player1Id: userId },
+            { player2Id: userId },
+        ],
+        },
+    },
     });
+
 
     const totalWins = matchWins + tournamentWins;
     const totalLosses = matchLosses + tournamentLosses;
