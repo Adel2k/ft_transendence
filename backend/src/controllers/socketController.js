@@ -3,6 +3,7 @@ import prisma from '../db/prisma.js';
 const onlineUsers = new Map();
 const matchSockets = new Map();
 const matchBallState = new Map();
+const matchScores = new Map();
 
 const handleConnection = (fastify) => {
     return async function (conn, req) {
@@ -107,6 +108,9 @@ const handleMatchSocket = (fastify) => {
             }
         });
 
+        const scores = matchScores.get(matchId) || { player1: 0, player2: 0 };
+        conn.send(JSON.stringify({ type: 'score_update', scores }));
+
         setTimeout(() => startBallForMatch(matchId), 5000);
     };
 };
@@ -120,6 +124,10 @@ function startBallForMatch(matchId) {
 
     if (!matchBallState.has(matchId)) {
         matchBallState.set(matchId, { position, direction, interval: null, paddle1z, paddle2z });
+    }
+
+    if (!matchScores.has(matchId)) {
+    matchScores.set(matchId, { player1: 0, player2: 0 });
     }
 
     const state = matchBallState.get(matchId);
@@ -167,9 +175,14 @@ function startBallForMatch(matchId) {
 
         if (position.x > 5 || position.x < -5) {
             const scorer = position.x > 5 ? 'player1' : 'player2';
+
+            const scores = matchScores.get(matchId) || { player1: 0, player2: 0 };
+            scores[scorer]++;
+            matchScores.set(matchId, scores);
+
             matchSockets.get(matchId)?.forEach((client) => {
                 if (client.readyState === 1) {
-                    client.send(JSON.stringify({ type: 'goal', scorer }));
+                    client.send(JSON.stringify({ type: 'goal', scorer, scores }));
                 }
             });
             resetBall();

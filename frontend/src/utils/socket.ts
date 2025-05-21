@@ -57,7 +57,10 @@ function setupSocketHandlers() {
         const { url } = msg;
         window.location.href = url;
       } else if (msg.type === 'goal') {
-        const event = new CustomEvent('goal', { detail: { scorer: msg.scorer } });
+        const event = new CustomEvent('goal', { detail: { scorer: msg.scorer, scores: msg.scores } });
+        window.dispatchEvent(event);
+      } else if (msg.type === 'score_update') {
+        const event = new CustomEvent('score_update', { detail: { scores: msg.scores } });
         window.dispatchEvent(event);
       }
     } catch (e) { }

@@ -30,7 +30,7 @@ export async function render(
 
     console.log('User IDs:', userIds);
     window.addEventListener('goal', (e: any) => {
-        scores[e.detail.scorer]++;
+        const scores = e.detail.scores;
         matchInfo.querySelector('#score-p1')!.textContent = scores.player1.toString();
         matchInfo.querySelector('#score-p2')!.textContent = scores.player2.toString();
 
@@ -73,5 +73,11 @@ export async function render(
                 });
             }
         }
+    });
+
+    window.addEventListener('score_update', (e: any) => {
+        const scores = e.detail.scores;
+        matchInfo.querySelector('#score-p1')!.textContent = scores.player1.toString();
+        matchInfo.querySelector('#score-p2')!.textContent = scores.player2.toString();
     });
 }
