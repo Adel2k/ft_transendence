@@ -75,28 +75,6 @@ export async function createTournamentUI(): Promise<HTMLElement> {
             const tournament = await response.json();
             showNotification(`Tournament  <<${tournament.name}>>  created successfully!`, 'success');
 
-            const userResponse = await fetch('/api/user/me', {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!userResponse.ok) throw new Error('Failed to fetch user data');
-            
-            const { user } = await userResponse.json();
-            const userId = Number(user.id);
-
-            const res = await fetch(`/api/tournament/${tournament.id}/join`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ userId })
-            });
-            
-            if (!res.ok) {
-                const err = await res.json();
-                showNotification(`Error inviting ${userId}: ${err.error}`, 'error');
-                return;
-            }
             window.location.href = `/tournament/${tournament.id}/${maxPlayers}`;
         } catch (error) {
             showNotification('Failed to create tournament. Please try again.', 'error');

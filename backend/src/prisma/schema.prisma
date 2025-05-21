@@ -7,6 +7,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Friendship {
+  id       Int @id @default(autoincrement())
+  userId   Int
+  friendId Int
+
+  user   User @relation("UserFriend", fields: [userId], references: [id])
+  friend User @relation("FriendOf", fields: [friendId], references: [id])
+
+  @@unique([userId, friendId])
+}
+
+model Match {
+  id        Int  @id @default(autoincrement())
+  player1   User @relation("Player1", fields: [player1Id], references: [id])
+  player1Id Int
+
+  player2   User @relation("Player2", fields: [player2Id], references: [id])
+  player2Id Int
+
+  winner   User @relation("MatchWinner", fields: [winnerId], references: [id])
+  winnerId Int
+
+  playedAt DateTime @default(now())
+}
+
+model TournamentMatch {
+  id           Int @id @default(autoincrement())
+  tournamentId Int
+  round        Int
+  matchOrder   Int
+
+  player1Id Int
+  player2Id Int
+  winnerId  Int?
+
+  playedAt DateTime?
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+
+  player1 User  @relation("TournamentPlayer1", fields: [player1Id], references: [id])
+  player2 User  @relation("TournamentPlayer2", fields: [player2Id], references: [id])
+  winner  User? @relation("TournamentWinner", fields: [winnerId], references: [id])
+}
+
+model Tournament {
+  id           Int                   @id @default(autoincrement())
+  name         String
+  createdAt    DateTime              @default(now())
+  currentRound Int                   @default(1)
+
+  matches      TournamentMatch[]
+  participants TournamentParticipant[]
+}
+
+model TournamentParticipant {
+  id           Int        @id @default(autoincrement())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  joinedAt DateTime @default(now())
+
+  @@unique([tournamentId, userId])
+}
+
 model User {
   id           Int      @id @default(autoincrement())
   email        String   @unique
@@ -33,57 +100,7 @@ model User {
   tournamentMatchesAsPlayer1 TournamentMatch[] @relation("TournamentPlayer1")
   tournamentMatchesAsPlayer2 TournamentMatch[] @relation("TournamentPlayer2")
   tournamentMatchesWon       TournamentMatch[] @relation("TournamentWinner")
+
+  tournamentParticipations TournamentParticipant[]
 }
 
-model Friendship {
-  id       Int @id @default(autoincrement())
-  userId   Int
-  friendId Int
-
-  user   User @relation("UserFriend", fields: [userId], references: [id])
-  friend User @relation("FriendOf", fields: [friendId], references: [id])
-
-  @@unique([userId, friendId])
-}
-
-model Match {
-  id        Int  @id @default(autoincrement())
-  player1   User @relation("Player1", fields: [player1Id], references: [id])
-  player1Id Int
-
-  player2   User @relation("Player2", fields: [player2Id], references: [id])
-  player2Id Int
-
-  winner   User @relation("MatchWinner", fields: [winnerId], references: [id])
-  winnerId Int
-
-  playedAt DateTime @default(now())
-}
-
-model Tournament {
-  id           Int      @id @default(autoincrement())
-  name         String
-  createdAt    DateTime @default(now())
-  currentRound Int      @default(1)
-
-  matches TournamentMatch[]
-}
-
-model TournamentMatch {
-  id           Int @id @default(autoincrement())
-  tournamentId Int
-  round        Int
-  matchOrder   Int
-
-  player1Id Int
-  player2Id Int
-  winnerId  Int?
-
-  playedAt DateTime?
-
-  tournament Tournament @relation(fields: [tournamentId], references: [id])
-
-  player1 User  @relation("TournamentPlayer1", fields: [player1Id], references: [id])
-  player2 User  @relation("TournamentPlayer2", fields: [player2Id], references: [id])
-  winner  User? @relation("TournamentWinner", fields: [winnerId], references: [id])
-}

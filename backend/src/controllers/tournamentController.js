@@ -20,7 +20,6 @@ const createTournament = async (req, reply) => {
     });
     reply.send(tournament);
 };
-
 const startTournament = async (req, reply) => {
     const { id } = req.params;
     const tournamentId = parseInt(id);
@@ -48,26 +47,43 @@ const startTournament = async (req, reply) => {
 
     const shuffled = fisherYatesShuffle([...users]);
 
+    const matchCreations = [];
     for (let i = 0; i < shuffled.length; i += 2) {
-        await prisma.tournamentMatch.create({
-            data: {
-                tournamentId,
-                round: 1,
-                matchOrder: i / 2 + 1,
-                player1Id: shuffled[i].id,
-                player2Id: shuffled[i + 1].id,
-            },
-        });
+        matchCreations.push(
+            prisma.tournamentMatch.create({
+                data: {
+                    tournamentId,
+                    round: 1,
+                    matchOrder: i / 2 + 1,
+                    player1Id: shuffled[i].id,
+                    player2Id: shuffled[i + 1].id,
+                },
+            })
+        );
     }
 
-    await prisma.tournament.update({
-        where: { id: tournamentId },
-        data: { currentRound: 1 },
-    });
+    const participantCreations = userIds.map(userId =>
+        prisma.tournamentParticipant.create({
+            data: {
+                tournamentId,
+                userId,
+            }
+        })
+    );
+
+    await prisma.$transaction([
+        prisma.tournament.update({
+            where: { id: tournamentId },
+            data: { currentRound: 1 },
+        }),
+        ...participantCreations,
+        ...matchCreations
+    ]);
 
     await socketController.broadcastStartToTournament(userIds, {
         player1Id: shuffled[0].id,
         player2Id: shuffled[1].id,
+        tournamentId: tournamentId,
     });
 
     reply.send({ message: 'Tournament started!' });
@@ -75,9 +91,11 @@ const startTournament = async (req, reply) => {
 
 const getNextMatch = async (req, reply) => {
     const { id } = req.params;
+    const tournamentId = parseInt(id);
+
     const match = await prisma.tournamentMatch.findFirst({
         where: {
-            tournamentId: parseInt(id),
+            tournamentId,
             winnerId: null,
         },
         orderBy: [
@@ -102,7 +120,25 @@ const getNextMatch = async (req, reply) => {
         },
     });
 
-    reply.send(match || { message: 'No pending matches' });
+    const tournamentParticipants = await prisma.tournamentParticipant.findMany({
+        where: { tournamentId },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    username: true,
+                    avatarUrl: true,
+                }
+            }
+        }
+    });
+
+    const participants = tournamentParticipants.map(tp => tp.user);
+
+    reply.send({
+        match: match || null,
+        participants
+    });
 };
 
 const submitMatchResult = async (req, reply) => {

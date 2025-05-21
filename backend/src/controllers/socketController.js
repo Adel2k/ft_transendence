@@ -192,32 +192,21 @@ function startBallForMatch(matchId) {
 }
 
 const broadcastStartToTournament = async (userIds, matchInfo) => {
+    console.log('Match info:', matchInfo);
     for (const userId of userIds) {
         const conn = onlineUsers.get(userId);
         if (conn?.readyState === 1) {
             conn.send(JSON.stringify({
                 type: 'tournament_started',
-                redirectTo: `/tournament/game`,
+                redirectTo: `/tournament/game/${matchInfo.tournamentId}`,
                 ...matchInfo
             }));
         }
     }
 };
 
-// These can be updated later to accept userIds if needed.
-const broadcastTournamentEnd = async (userIds) => {
-    for (const userId of userIds) {
-        const conn = onlineUsers.get(userId);
-        if (conn?.readyState === 1) {
-            conn.send(JSON.stringify({
-                type: 'redirect',
-                url: '/profile'
-            }));
-        }
-    }
-};
 
-const broadcastNextMatch = async (userIds, url) => {
+const broadcastRedirect = async (userIds, url) => {
     for (const userId of userIds) {
         const conn = onlineUsers.get(userId);
         if (conn?.readyState === 1) {
@@ -233,8 +222,7 @@ export default {
     handleConnection,
     handleMatchSocket,
     broadcastStartToTournament,
-    broadcastTournamentEnd,
-    broadcastNextMatch,
+    broadcastRedirect,
     isUserOnline,
     getOnlineUsers
 };
