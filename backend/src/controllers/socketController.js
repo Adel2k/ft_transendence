@@ -63,10 +63,6 @@ const handleMatchSocket = (fastify) => {
             },
         });
 
-        if (!match || ![match.player1Id, match.player2Id].includes(userId)) {
-            return conn?.close();
-        }
-
         if (!matchSockets.has(matchId)) matchSockets.set(matchId, []);
         matchSockets.get(matchId).push(conn);
 
