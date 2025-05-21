@@ -29,7 +29,7 @@ services:
     build: ./backend/
     container_name: backend
     volumes:
-      - db:/app/src/prisma
+      - db:/app/prisma
       - avatars:/app/public/avatars
     restart: always
     environment:

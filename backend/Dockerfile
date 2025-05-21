@@ -10,9 +10,6 @@ COPY . .
 
 COPY ./src/prisma ./prisma
 
-WORKDIR /app/src
-
-WORKDIR /app
 COPY load_secrets.sh .
 RUN chmod +x load_secrets.sh
 
