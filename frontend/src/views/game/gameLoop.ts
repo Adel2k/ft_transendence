@@ -13,6 +13,9 @@ export function runGameLoop(
     const input = setupInput(ball);
     const paddleSpeed = 0.1;
 
+    let lastPaddle1z = 0;
+    let lastPaddle2z = 0;
+
     function sendPaddlePosition(role: string, z: number) {
         const socket = getWebSocket();
         if (socket && socket.readyState === WebSocket.OPEN) {
@@ -33,6 +36,19 @@ export function runGameLoop(
             paddle2.position.z = z;
         }
     });
+
+    window.addEventListener('paddle_positions', (e: Event) => {
+        const { paddle1z, paddle2z } = (e as CustomEvent).detail;
+        lastPaddle1z = paddle1z;
+        lastPaddle2z = paddle2z;
+        if (paddle1 && paddle2) {
+            paddle1.position.z = paddle1z;
+            paddle2.position.z = paddle2z;
+        }
+    });
+
+    paddle1.position.z = lastPaddle1z;
+    paddle2.position.z = lastPaddle2z;
 
     window.addEventListener('ball_update', (e: Event) => {
         const { position } = (e as CustomEvent).detail;

@@ -34,11 +34,11 @@ export async function render(
         matchInfo.querySelector('#score-p1')!.textContent = scores.player1.toString();
         matchInfo.querySelector('#score-p2')!.textContent = scores.player2.toString();
 
-        if (scores.player1 >= 2 || scores.player2 >= 2) {
+        if (scores.player1 >= 5 || scores.player2 >= 5) {
             window.dispatchEvent(new CustomEvent('stop_ball'));
 
-            const winnerId = scores.player1 >= 2 ? options?.match.player1Id : options?.match.player2Id;
-            const winnerRole = scores.player1 >= 2 ? 'player1' : 'player2';
+            const winnerId = scores.player1 >= 5 ? options?.match.player1Id : options?.match.player2Id;
+            const winnerRole = scores.player1 >= 5 ? 'player1' : 'player2';
             const tournamentId = options?.match.tournamentId;
             const matchId = options?.match.id;
 

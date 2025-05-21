@@ -67,6 +67,15 @@ const handleMatchSocket = (fastify) => {
         if (!matchSockets.has(matchId)) matchSockets.set(matchId, []);
         matchSockets.get(matchId).push(conn);
 
+        const state = matchBallState.get(matchId);
+        if (state) {
+            conn.send(JSON.stringify({
+                type: 'paddle_positions',
+                paddle1z: state.paddle1z,
+                paddle2z: state.paddle2z
+            }));
+        }
+
         conn.on('message', (raw) => {
             try {
                 const msg = JSON.parse(raw.toString());
@@ -83,16 +92,16 @@ const handleMatchSocket = (fastify) => {
                     if (state) {
                         if (msg.role === 'player1') state.paddle1z = msg.z;
                         if (msg.role === 'player2') state.paddle2z = msg.z;
+                        matchSockets.get(matchId)?.forEach((client) => {
+                            if (client.readyState === 1) {
+                                client.send(JSON.stringify({
+                                    type: 'paddle_positions',
+                                    paddle1z: state.paddle1z,
+                                    paddle2z: state.paddle2z
+                                }));
+                            }
+                        });
                     }
-                    matchSockets.get(matchId)?.forEach((client) => {
-                        if (client !== conn && client.readyState === 1) {
-                            client.send(JSON.stringify({
-                                type: 'paddle_move',
-                                role: msg.role,
-                                z: msg.z
-                            }));
-                        }
-                    });
                 }
             } catch (e) {
                 console.warn('❌ Invalid message format:', e.message);

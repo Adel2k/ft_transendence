@@ -62,6 +62,9 @@ function setupSocketHandlers() {
       } else if (msg.type === 'score_update') {
         const event = new CustomEvent('score_update', { detail: { scores: msg.scores } });
         window.dispatchEvent(event);
+      } else if (msg.type === 'paddle_positions') {
+        const event = new CustomEvent('paddle_positions', { detail: { paddle1z: msg.paddle1z, paddle2z: msg.paddle2z } });
+        window.dispatchEvent(event);
       }
     } catch (e) { }
   };
