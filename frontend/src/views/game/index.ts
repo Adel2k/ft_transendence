@@ -18,6 +18,33 @@ export async function render(
     canvas.className = 'w-screen h-screen';
     root.appendChild(canvas);
 
+    const controls = document.createElement('div');
+    controls.className = `
+        fixed bottom-4 left-24 w-full flex justify-center gap-8 z-[1001]
+        sm:hidden
+    `;
+    controls.innerHTML = `
+      <button id="btn-up" class="bg-gray-800 text-white rounded-full w-16 h-16 text-3xl shadow-lg active:bg-gray-600">▲</button>
+      <button id="btn-down" class="bg-gray-800 text-white rounded-full w-16 h-16 text-3xl shadow-lg active:bg-gray-600">▼</button>
+    `;
+    root.appendChild(controls);
+
+    const btnUp = controls.querySelector('#btn-up') as HTMLButtonElement;
+    const btnDown = controls.querySelector('#btn-down') as HTMLButtonElement;
+
+    btnUp.addEventListener('touchstart', () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowUp' }));
+    });
+    btnUp.addEventListener('touchend', () => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowUp' }));
+    });
+    btnDown.addEventListener('touchstart', () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowDown' }));
+    });
+    btnDown.addEventListener('touchend', () => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowDown' }));
+    });
+
     createPongScene(canvas, options);
 
     const navbar = await createNavbar();
