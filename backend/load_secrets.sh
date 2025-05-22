@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export VAULT_ADDR=http://vault:8300
-export VAULT_TOKEN=hvs.CFMt8PNsCMuNfYnsTZBulKUG
+export VAULT_TOKEN=${VAULT_TOKEN}
 
 SECRET_JSON=$(curl -s --header "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/secret/data/transcendence")
 

@@ -4,6 +4,6 @@ vault server -config=/vault/config &
 
 sleep 5
 
-vault operator unseal /Li+SkCp+nopkQMMBEPQTNaAyN+WYa5XACcPLCvtgC0=
+vault operator unseal ${UNSEAL_KEY}
 
 wait

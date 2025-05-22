@@ -28,10 +28,7 @@ RUN cd /opt && \
 COPY ./nginx/main.conf /etc/nginx/modsec/main.conf
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
-
-# Copy virtual host config
 COPY ./nginx/conf.d/ /etc/nginx/conf.d/
-
 
 RUN rm -rf /docker-entrypoint.d/* /etc/nginx/templates/ /opt/owasp-crs
 
